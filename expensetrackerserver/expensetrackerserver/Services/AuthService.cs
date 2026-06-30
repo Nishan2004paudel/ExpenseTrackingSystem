@@ -27,10 +27,10 @@ namespace expensetrackerserver.Services
             }
             var user = new User
             {
-                FullName = dto.FullName,
+                Username = dto.Username,
                 Email = dto.Email,
                 Password = dto.Password,
-                Username = dto.Username,
+                FullName = dto.FullName,
                 Profession = dto.Profession,
                 PreferredCalendar = dto.PreferredCalendar
             };
