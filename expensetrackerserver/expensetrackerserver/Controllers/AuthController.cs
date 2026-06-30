@@ -32,6 +32,11 @@ namespace expensetrackerserver.Controllers
             return Ok(response);
         }
 
-
+        [HttpGet("userdetail/{userId}")]
+        public async Task<IActionResult> Detail(int userId)
+        {
+            var user = await _service.GetUserDetail(userId);
+            return Ok(user);
+        }
     }
 }
