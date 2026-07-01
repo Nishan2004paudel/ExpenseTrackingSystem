@@ -15,7 +15,7 @@ namespace expensetrackerserver.Repositories
 
         public async Task<IEnumerable<UserDetailDto>> GetAll()
         {
-            var sql = "SELECT UserId, Username, Email, FullName,Profession, PreferredCalendar FROM [User]";
+            var sql = "SELECT UserId, Username, Email, FullName,Profession, PreferredCalendar,Role FROM [User]";
             using var connection = _context.CreateConnection();
             return await connection.QueryAsync<UserDetailDto>(sql);
         }
@@ -30,7 +30,7 @@ namespace expensetrackerserver.Repositories
 
         public async Task<int> Create(User user)
         {
-            var sql = @"INSERT INTO [User] (Username,Email,Password, FullName,Profession, PreferredCalendar) VALUES ( @Username, @Email,@Password, @FullName, @Profession, @PreferredCalendar);
+            var sql = @"INSERT INTO [User] (Username,Email,Password, FullName,Profession, PreferredCalendar,Role) VALUES ( @Username, @Email,@Password, @FullName, @Profession, @PreferredCalendar,@Role);
                         SELECT CAST(SCOPE_IDENTITY() AS INT);";
             using var connection = _context.CreateConnection();
             return await connection.ExecuteScalarAsync<int>(sql, user);

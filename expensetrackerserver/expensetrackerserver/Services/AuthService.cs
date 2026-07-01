@@ -1,4 +1,5 @@
 ﻿using expensetrackerserver.DTOs;
+using expensetrackerserver.Exceptions;
 using expensetrackerserver.Models;
 using expensetrackerserver.Repositories;
 namespace expensetrackerserver.Services
@@ -16,23 +17,26 @@ namespace expensetrackerserver.Services
 
         public async Task<UserDetailDto> Register(RegisterUserDto dto)
         {
+            ValidatePassword(dto.Password);
+            ValidatePreferredCalendar(dto.PreferredCalendar);
             if (await _repo.EmailExists(dto.Email))
             {
-                throw new Exception("Email already exists.");
+                throw new EmailAlreadyExistsException();
             }
 
             if (await _repo.UsernameExists(dto.Username))
             {
-                throw new Exception("Username already exists.");
+                throw new UsernameAlreadyExistsException();
             }
             var user = new User
             {
                 Username = dto.Username,
                 Email = dto.Email,
-                Password = dto.Password,
+                Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 FullName = dto.FullName,
                 Profession = dto.Profession,
-                PreferredCalendar = dto.PreferredCalendar
+                PreferredCalendar = dto.PreferredCalendar,
+                Role = "User"
             };
             int newUserId = await _repo.Create(user);
 
@@ -43,8 +47,35 @@ namespace expensetrackerserver.Services
                 Email = user.Email,
                 FullName = user.FullName,
                 Profession = user.Profession,
-                PreferredCalendar = user.PreferredCalendar
+                PreferredCalendar = user.PreferredCalendar,
+                Role = user.Role
             };
+        }
+
+        private void ValidatePassword(string password)
+        {
+            if (!password.Any(char.IsUpper))
+            {
+                throw new InvalidPasswordException("Password must contain at least one uppercase letter.");
+            }
+
+            if (!password.Any(char.IsLower))
+            {
+                throw new InvalidPasswordException("Password must contain at least one lowercase letter.");
+            }
+
+            if (!password.Any(char.IsDigit))
+            {
+                throw new InvalidPasswordException("Password must contain at least one number.");
+            }
+        }
+
+        private void ValidatePreferredCalendar(string preferredCalendar)
+        {
+            if (!preferredCalendar.Equals("English", StringComparison.OrdinalIgnoreCase) && !preferredCalendar.Equals("Nepali", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidPreferredCalendarException();
+            }
         }
 
         public async Task<LoginResponseDto> Login(LoginDto dto)
@@ -53,12 +84,12 @@ namespace expensetrackerserver.Services
 
             if (user == null)
             {
-                throw new Exception("Invalid username/email or password.");
+                throw new InvalidCredentialsException();
             }
 
-            if (user.Password != dto.Password)
+            if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
             {
-                throw new Exception("Invalid username/email or password.");
+                throw new InvalidCredentialsException();
             }
 
             return new LoginResponseDto
@@ -71,7 +102,8 @@ namespace expensetrackerserver.Services
                     Email = user.Email,
                     FullName = user.FullName,
                     Profession = user.Profession,
-                    PreferredCalendar = user.PreferredCalendar
+                    PreferredCalendar = user.PreferredCalendar,
+                    Role = user.Role
                 },
                 Token = null
             };
@@ -82,7 +114,7 @@ namespace expensetrackerserver.Services
 
             if (user == null)
             {
-                return null;
+                throw new UserNotFoundException();
             }
 
             return new UserDetailDto
@@ -92,7 +124,8 @@ namespace expensetrackerserver.Services
                 Email = user.Email,
                 FullName = user.FullName,
                 Profession = user.Profession,
-                PreferredCalendar = user.PreferredCalendar
+                PreferredCalendar = user.PreferredCalendar,
+                Role = user.Role
             };
         }
     }
