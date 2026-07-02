@@ -10,6 +10,7 @@
         "dependencies": {
           "BCrypt.Net-Next": "4.2.0",
           "Dapper": "2.1.79",
+          "Microsoft.AspNetCore.Authentication.JwtBearer": "8.0.28",
           "Microsoft.Data.SqlClient": "7.0.2",
           "Swashbuckle.AspNetCore": "6.6.2"
         },
@@ -30,6 +31,17 @@
           "lib/net8.0/Dapper.dll": {
             "assemblyVersion": "2.0.0.0",
             "fileVersion": "2.1.79.29349"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Authentication.JwtBearer/8.0.28": {
+        "dependencies": {
+          "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.16.0"
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll": {
+            "assemblyVersion": "8.0.28.0",
+            "fileVersion": "8.0.2826.26913"
           }
         }
       },
@@ -411,6 +423,13 @@
       "sha512": "sha512-8YijbzgTfmqmQOnVNorYM6K++pxqnW3nJ4aC1sRHzxUA2CcuoJ9gsTem3kgBnPRMc38zZHl4Esb6hAezXIEEuw==",
       "path": "dapper/2.1.79",
       "hashPath": "dapper.2.1.79.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Authentication.JwtBearer/8.0.28": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+G3RdPYOgWkeB+CCIsLHTmIUjqMeoqRG7VKMOL1cGrXJeXtDP6UN1V2NVKn4ucLAjo3yfPdA6VUmbiXpfHxwpQ==",
+      "path": "microsoft.aspnetcore.authentication.jwtbearer/8.0.28",
+      "hashPath": "microsoft.aspnetcore.authentication.jwtbearer.8.0.28.nupkg.sha512"
     },
     "Microsoft.Bcl.Cryptography/8.0.0": {
       "type": "package",

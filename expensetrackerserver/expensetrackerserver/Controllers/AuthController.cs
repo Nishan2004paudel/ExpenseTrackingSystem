@@ -2,7 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using expensetrackerserver.Services;
 using expensetrackerserver.DTOs;
-
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace expensetrackerserver.Controllers
 {
@@ -32,9 +33,11 @@ namespace expensetrackerserver.Controllers
             return Ok(response);
         }
 
-        [HttpGet("userdetail/{userId}")]
-        public async Task<IActionResult> Detail(int userId)
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<IActionResult> Me()
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var user = await _service.GetUserDetail(userId);
             return Ok(user);
         }
