@@ -5,6 +5,6 @@ namespace expensetrackerserver.Services
     {
         Task<UserDetailDto> Register(RegisterUserDto dto);
         Task<LoginResponseDto> Login(LoginDto dto);
-        Task<UserDetailDto?> GetUserDetail(int userId);
+        Task<UserDetailDto> GetUserDetail(int userId);
     }
 }
