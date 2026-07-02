@@ -7,12 +7,12 @@ namespace expensetrackerserver.Services
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _repo;
-        private readonly IConfiguration _config;
+        private readonly IJwtService _jwtService;
 
-        public AuthService(IUserRepository repo, IConfiguration config)
+        public AuthService(IUserRepository repo, IJwtService jwtService)
         {
             _repo = repo;
-            _config = config;
+            _jwtService = jwtService;
         }
 
         public async Task<UserDetailDto> Register(RegisterUserDto dto)
@@ -105,10 +105,10 @@ namespace expensetrackerserver.Services
                     PreferredCalendar = user.PreferredCalendar,
                     Role = user.Role
                 },
-                Token = null
+                Token = _jwtService.GenerateToken(user)
             };
         }
-        public async Task<UserDetailDto?> GetUserDetail(int userId)
+        public async Task<UserDetailDto> GetUserDetail(int userId)
         {
             var user = await _repo.GetById(userId);
 
