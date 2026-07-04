@@ -8,7 +8,7 @@ namespace expensetrackerserver.Repositories
         Task<int> Create(Category category);
         Task<IEnumerable<Category>> GetAllByUserId(int userId);
         Task<Category?> GetById(int categoryId);
-        Task<bool> CategoryExists(int userId, string categoryName);
+        Task<bool> CategoryExists(int userId, string categoryName, int? excludeCategoryId = null);
         Task Update(Category category);
         Task SoftDelete(int categoryId);
     }
