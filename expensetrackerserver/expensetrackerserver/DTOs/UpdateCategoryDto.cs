@@ -1,7 +1,8 @@
 ﻿namespace expensetrackerserver.DTOs
 {
+    //client to server
     public class UpdateCategoryDto
     {
-        public string CategoryName = string.Empty;
+        public string CategoryName { get; set; } = string.Empty;
     }
 }
