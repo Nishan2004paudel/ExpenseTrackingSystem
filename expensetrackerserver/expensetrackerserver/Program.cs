@@ -21,6 +21,8 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+builder.Services.AddScoped<IBudgetService, BudgetService>();
 
 builder.Services.AddControllers();
 builder.Services.Configure<JwtSettings>(

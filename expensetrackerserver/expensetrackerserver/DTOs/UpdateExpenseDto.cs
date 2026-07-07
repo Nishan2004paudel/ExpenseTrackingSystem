@@ -10,7 +10,7 @@ namespace expensetrackerserver.DTOs
         [Range(0.01,double.MaxValue,ErrorMessage ="Amount must be greater than zero.")]
         public decimal Amount { get; set; }
         [Required]
-        public DateOnly ExpenseDate { get; set; }
+        public DateTime ExpenseDate { get; set; }
         [StringLength(255)]
         public string? Description { get; set; }
     }
