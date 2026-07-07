@@ -42,6 +42,85 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "expensetrackerserver.Controllers.BudgetController",
+    "Method": "Create",
+    "RelativePath": "api/Budget",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.CreateBudgetDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.BudgetController",
+    "Method": "GetAll",
+    "RelativePath": "api/Budget",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.BudgetController",
+    "Method": "GetById",
+    "RelativePath": "api/Budget/{budgetId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "budgetId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.BudgetController",
+    "Method": "Update",
+    "RelativePath": "api/Budget/{budgetId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "budgetId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.UpdateBudgetDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.BudgetController",
+    "Method": "Delete",
+    "RelativePath": "api/Budget/{budgetId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "budgetId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "expensetrackerserver.Controllers.CategoryController",
     "Method": "Create",
     "RelativePath": "api/Category",
