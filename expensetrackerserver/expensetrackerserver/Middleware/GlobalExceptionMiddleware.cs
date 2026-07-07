@@ -43,6 +43,9 @@ namespace expensetrackerserver.Middleware
                 CategoryAlreadyExistsException => StatusCodes.Status409Conflict,
                 CategoryNotFoundException => StatusCodes.Status404NotFound,
                 CategoryAccessDeniedException => StatusCodes.Status403Forbidden,
+                BudgetAlreadyExistsException => StatusCodes.Status409Conflict,
+                BudgetNotFoundException => StatusCodes.Status404NotFound,
+                BudgetAccessDeniedException => StatusCodes.Status403Forbidden,
                 InvalidOperationException => StatusCodes.Status400BadRequest,
                 _ => StatusCodes.Status500InternalServerError
             };
