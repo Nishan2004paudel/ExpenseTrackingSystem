@@ -30,8 +30,8 @@ namespace expensetrackerserver.Controllers
         public async Task<IActionResult> GetAll()
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var expenes = await _service.GetAllByUserId(userId);
-            return Ok(expenes);
+            var expenses = await _service.GetAllByUserId(userId);
+            return Ok(expenses);
         }
 
         [HttpGet("{expenseId}")]
