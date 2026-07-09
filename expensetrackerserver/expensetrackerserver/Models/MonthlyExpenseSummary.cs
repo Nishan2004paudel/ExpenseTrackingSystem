@@ -1,7 +1,9 @@
 ﻿namespace expensetrackerserver.Models
 {
-    public class DashboardSummary
+    public class MonthlyExpenseSummary
     {
+        public int Year { get; set; }
+        public int Month { get; set; }
         public decimal? BudgetAmount { get; set; }
         public decimal ExpenseAmount { get; set; }
     }
