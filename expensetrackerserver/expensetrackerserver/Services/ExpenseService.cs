@@ -26,6 +26,11 @@ namespace expensetrackerserver.Services
                 throw new CategoryAccessDeniedException("You are not allowed to use this category.");
             }
 
+            if (dto.ExpenseDate.Date > DateTime.Today)
+            {
+                throw new InvalidExpenseDateException("Expense date cannot be in the future.");
+            }
+
             var expense = new Expense
             {
 
@@ -110,6 +115,11 @@ namespace expensetrackerserver.Services
             if (category.UserId != userId)
             {
                 throw new CategoryAccessDeniedException("You are not allowed to use this category.");
+            }
+
+            if (dto.ExpenseDate.Date > DateTime.Today)
+            {
+                throw new InvalidExpenseDateException("Expense date cannot be in the future.");
             }
 
             var updatedExpense = new Expense
