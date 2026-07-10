@@ -40,7 +40,7 @@ namespace expensetrackerserver.Controllers
 
             return Ok(result);
         }
-        [HttpGet("month-breakdown-category")]
+        [HttpGet("month/breakdown")]
         public async Task<IActionResult> GetMonthBreakdown([FromQuery] int year, [FromQuery] int month, [FromQuery] bool includeEmpty = false)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -53,6 +53,21 @@ namespace expensetrackerserver.Controllers
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var result = await _service.GetExpenseByCategory(userId, year, includeEmpty);
+
+            return Ok(result);
+        }
+
+        [HttpGet("categories/breakdown")]
+        public async Task<IActionResult> GetCategoryBreakdown(
+            [FromQuery] int year,
+            [FromQuery] int categoryId)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            var result = await _service.GetCategoryBreakdown(
+                userId,
+                year,
+                categoryId);
 
             return Ok(result);
         }

@@ -19,14 +19,6 @@ namespace expensetrackerserver.Repositories
             using var connection = _context.CreateConnection();
             return await connection.ExecuteScalarAsync<int>(sql, expense);
         }
-        public async Task<IEnumerable<ExpenseWithCategory>> GetAllByUserId(int userId)
-        {
-            var sql = @"SELECT e.ExpenseId, e.UserId,e.CategoryId, c.CategoryName,e.Amount,e.ExpenseDate,e.Description FROM Expense e INNER JOIN Category c ON e.CategoryId = c.CategoryId WHERE e.UserId = @UserId AND e.IsDeleted = 0 ORDER BY e.ExpenseDate DESC, e.CreatedAt DESC;";
-            using var connection = _context.CreateConnection();
-            return await connection.QueryAsync<ExpenseWithCategory>(
-                sql,
-                new { UserId = userId });
-        }
         public async Task<ExpenseWithCategory?> GetById(int expenseId)
         {
             var sql = @"SELECT e.ExpenseId,e.UserId, e.CategoryId, c.CategoryName,e.Amount,e.ExpenseDate, e.Description FROM Expense e INNER JOIN Category c ON e.CategoryId = c.CategoryId WHERE e.ExpenseId = @ExpenseId AND e.IsDeleted = 0;";
@@ -57,6 +49,45 @@ namespace expensetrackerserver.Repositories
             await connection.ExecuteAsync(
                 sql,
                 new { ExpenseId = expenseId });
+        }
+
+        public async Task<IEnumerable<ExpenseWithCategory>> GetFilteredExpenses(int userId, int? year, int? month, int? categoryId)
+        {
+            var sql = @"
+                        SELECT e.ExpenseId,e.UserId,e.CategoryId,c.CategoryName,e.Amount,e.ExpenseDate,e.Description FROM Expense e
+                        INNER JOIN Category c
+                                ON  e.CategoryId = c.CategoryId
+                        WHERE e.UserId = @UserId
+                        AND e.IsDeleted = 0
+                        AND
+                        (
+                            @Year IS NULL
+                            OR YEAR(e.ExpenseDate)=@Year
+                        )
+                        AND 
+                        (
+                            @Month IS NULL
+                            OR MONTH(e.ExpenseDate) = @Month
+                        )
+                        AND 
+                        (
+                            @CategoryId IS NULL
+                            OR e.CategoryId = @CategoryId
+                        )
+
+                        ORDER BY 
+                            e.ExpenseDate DESC,
+                            e.ExpenseId DESC;";
+            using var connection = _context.CreateConnection();
+            return await connection.QueryAsync<ExpenseWithCategory>(
+                sql,
+                new
+                {
+                    UserId = userId,
+                    Year = year,
+                    Month = month,
+                    CategoryId = categoryId
+                });
         }
     }
 }

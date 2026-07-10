@@ -142,5 +142,36 @@ namespace expensetrackerserver.Services
                 };
             }).ToList();
         }
+
+        public async Task<IEnumerable<CategoryMonthlySummaryDto>> GetCategoryBreakdown(int userId, int year, int categoryId)
+        {
+            var months = await _repo.GetCategoryBreakdown(userId, year, categoryId);
+
+            return months.Select(m =>
+            {
+                decimal? remainingAmount = null;
+                decimal? percentageUsed = null;
+
+                if (m.BudgetAmount.HasValue)
+                {
+                    remainingAmount = m.BudgetAmount.Value - m.ExpenseAmount;
+                    if (m.BudgetAmount.Value > 0)
+                    {
+                        percentageUsed = Math.Round((m.ExpenseAmount / m.BudgetAmount.Value) * 100, 2);
+                    }
+                }
+
+                return new CategoryMonthlySummaryDto
+                {
+                    Year = m.Year,
+                    Month = m.Month,
+                    MonthName = new DateTime(year, m.Month, 1).ToString("MMMM"),
+                    BudgetAmount = m.BudgetAmount,
+                    ExpenseAmount = m.ExpenseAmount,
+                    RemainingAmount = remainingAmount,
+                    PercentageUsed = percentageUsed
+                };
+            }).ToList();
+        }
     }
 }

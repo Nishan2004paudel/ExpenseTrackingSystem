@@ -36,7 +36,7 @@ namespace expensetrackerserver.Repositories
         }
         public async Task<bool> BudgetExists(int userId, int? categoryId, DateTime budgetMonth, int? excludeBudgetId = null)
         {
-            var sql = @"SELECT COUNT(1) FROM BudgetLimit WHERE UserId = @UserId AND BudgetMonth = @BudgetMonth AND IsDeleted = 0 
+            var sql = @"SELECT COUNT(1) FROM BudgetLimit WHERE UserId = @UserId AND YEAR(BudgetMonth) = YEAR(@BudgetMonth) AND MONTH(BudgetMonth) = MONTH(@BudgetMonth) AND IsDeleted = 0 
                         AND ((CategoryId IS NULL AND @CategoryId IS NULL) 
                               OR 
                             (CategoryId = @CategoryId))
