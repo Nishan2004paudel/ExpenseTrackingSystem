@@ -14,5 +14,6 @@ namespace expensetrackerserver.Repositories
 
         Task<IEnumerable<MonthlyCategorySummary>> GetMonthBreakdown(int userId, int year, int month, bool includeEmpty = false);
         Task<IEnumerable<CategoryExpenseSummary>> GetExpenseByCategory(int userId, int year, bool includeEmpty = false);
+        Task<IEnumerable<CategoryMonthlySummary>> GetCategoryBreakdown(int userId, int year, int categoryId);
     }
 }

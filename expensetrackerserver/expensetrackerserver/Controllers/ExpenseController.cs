@@ -27,10 +27,10 @@ namespace expensetrackerserver.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int? year, [FromQuery] int? month, [FromQuery] int? categoryId)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var expenses = await _service.GetAllByUserId(userId);
+            var expenses = await _service.GetFilteredExpenses(userId, year, month, categoryId);
             return Ok(expenses);
         }
 

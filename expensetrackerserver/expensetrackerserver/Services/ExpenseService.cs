@@ -53,21 +53,7 @@ namespace expensetrackerserver.Services
                 Description = expense.Description
             };
         }
-        public async Task<IEnumerable<ExpenseDto>> GetAllByUserId(int userId)
-        {
-            var expenses = await _repo.GetAllByUserId(userId);
 
-            return expenses.Select(e => new ExpenseDto
-            {
-                ExpenseId = e.ExpenseId,
-                CategoryId = e.CategoryId,
-                CategoryName = e.CategoryName,
-                Amount = e.Amount,
-                ExpenseDate = e.ExpenseDate,
-                Description = e.Description
-            })
-                .ToList();
-        }
         public async Task<ExpenseDto> GetById(int expenseId, int userId)
         {
             var expense = await _repo.GetById(expenseId);
@@ -147,6 +133,8 @@ namespace expensetrackerserver.Services
         }
         public async Task SoftDelete(int expenseId, int userId)
         {
+
+
             var expense = await _repo.GetById(expenseId);
 
             if (expense == null)
@@ -163,6 +151,20 @@ namespace expensetrackerserver.Services
             await _repo.SoftDelete(expenseId);
         }
 
+        public async Task<IEnumerable<ExpenseDto>> GetFilteredExpenses(int userId, int? year, int? month, int? categoryId)
+        {
+            var expenses = await _repo.GetFilteredExpenses(userId, year, month, categoryId);
+
+            return expenses.Select(e => new ExpenseDto
+            {
+                ExpenseId = e.ExpenseId,
+                CategoryId = e.CategoryId,
+                CategoryName = e.CategoryName,
+                Amount = e.Amount,
+                ExpenseDate = e.ExpenseDate,
+                Description = e.Description
+            }).ToList();
+        }
     }
 }
 

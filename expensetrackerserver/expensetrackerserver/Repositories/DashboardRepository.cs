@@ -275,5 +275,73 @@ namespace expensetrackerserver.Repositories
                     IncludeEmpty = includeEmpty
                 });
         }
+
+        public async Task<IEnumerable<CategoryMonthlySummary>> GetCategoryBreakdown(int userId, int year, int categoryId)
+        {
+            var sql = @"
+                    WITH Months AS 
+                    (
+                        SELECT MONTH (BudgetMonth) AS MonthNumber
+                        FROM BudgetLimit
+                        WHERE UserId = @UserId
+                            AND CategoryId = @CategoryId
+                            AND YEAR(BudgetMonth) = @Year
+                            AND IsDeleted = 0
+                        UNION
+                        SELECT MONTH (ExpenseDate)
+                        FROM Expense
+                        WHERE UserId = @UserId
+                            AND CategoryId = @CategoryId
+                            AND YEAR(ExpenseDate) = @Year
+                            AND IsDeleted = 0
+                    )
+                    
+                    SELECT 
+                        @Year AS Year,  
+                        m.MonthNumber AS Month,
+                        b.BudgetAmount,
+                        ISNULL(e.ExpenseAmount,0) AS ExpenseAmount
+
+                    FROM Months m
+
+                    LEFT JOIN
+                    (
+                        SELECT
+                            MONTH(BudgetMonth) AS BudgetMonthNumber,
+                            SUM(BudgetAmount) AS BudgetAmount
+                        FROM BudgetLimit
+                        WHERE UserId = @UserId
+                            AND CategoryId = @CategoryId 
+                            AND YEAR(BudgetMonth) = @Year
+                            AND IsDeleted = 0
+                        GROUP BY MONTH(BudgetMonth)
+                    )b
+                        ON b.BudgetMonthNumber = m.MonthNumber
+
+                    LEFT JOIN
+                    (
+                        SELECT 
+                            MONTH(ExpenseDate) AS ExpenseMonthNumber,
+                            SUM(Amount) AS ExpenseAmount
+                        FROM Expense
+                        WHERE UserId = @UserId
+                            AND CategoryId = @CategoryId
+                            AND YEAR(ExpenseDate) = @Year
+                            AND IsDeleted = 0
+                        GROUP BY MONTH(ExpenseDate)
+                    ) e
+                        ON e.ExpenseMonthNumber = m.MonthNumber
+                    ORDER BY m.MonthNumber;";
+
+            using var connection = _context.CreateConnection();
+            return await connection.QueryAsync<CategoryMonthlySummary>(
+                sql,
+                new
+                {
+                    UserId = userId,
+                    Year = year,
+                    CategoryId = categoryId
+                });
+        }
     }
 }
