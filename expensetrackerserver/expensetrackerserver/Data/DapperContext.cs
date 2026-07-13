@@ -10,7 +10,8 @@ namespace expensetrackerserver.Data
         public DapperContext(IConfiguration configuration)
         {
             _configuration = configuration;
-            _connectionString = _configuration.GetConnectionString("DefaultConnection");
+            _connectionString = _configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("DefaultConnection is missing.");
         }
 
         public IDbConnection CreateConnection() => new SqlConnection(_connectionString);
