@@ -91,7 +91,7 @@ namespace expensetrackerserver.Repositories
                         SELECT 
                             @Year AS Year,
                             m.MonthNumber AS Month,
-                            b.BudgetAmount,
+                            ISNULL(b.BudgetAmount, 0) AS BudgetAmount,
                         
                             ISNULL(e.ExpenseAmount,0) AS ExpenseAmount
                         FROM Months m
@@ -138,22 +138,22 @@ namespace expensetrackerserver.Repositories
                                )
                             )
 
-                            AND
-                            (
-                                 @Year < YEAR(GETDATE())
-
-                                 OR
-
-                                 (
-                                     @Year=YEAR(GETDATE())
-
-                                      AND
-
-                                         m.MonthNumber<=MONTH(GETDATE())
-                                    )
-                                )
+                       
                                 ORDER BY m.MonthNumber;";
+            //AND
+            //(
+            //     @Year < YEAR(GETDATE())
 
+            //     OR
+
+            //     (
+            //         @Year=YEAR(GETDATE())
+
+            //          AND
+
+            //             m.MonthNumber<=MONTH(GETDATE())
+            //        )
+            //    )
             using var connection = _context.CreateConnection();
             return await connection.QueryAsync<MonthlyExpenseSummary>(
                 sql,
