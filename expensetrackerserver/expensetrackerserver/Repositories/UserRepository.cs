@@ -54,6 +54,16 @@ namespace expensetrackerserver.Repositories
             return count > 0;
 
         }
+        public async Task IncrementTokenVersion(int userId)
+        {
+            var sql = @"UPDATE [User] SET TokenVersion = TokenVersion + 1, UpdatedAt = GETDATE() WHERE UserId = @UserId;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql,
+                new
+                {
+                    UserId = userId
+                });
+        }
 
         public async Task<bool> UsernameExists(string username)
         {
@@ -64,6 +74,17 @@ namespace expensetrackerserver.Repositories
 
             return count > 0;
 
+        }
+
+        public async Task<int?> GetTokenVersion(int userId)
+        {
+            var sql = @"SELECT TokenVersion FROM [User] WHERE UserId = @UserId;";
+            using var connection = _context.CreateConnection();
+            return await connection.ExecuteScalarAsync<int>(sql,
+                new
+                {
+                    UserId = userId
+                });
         }
     }
 }
