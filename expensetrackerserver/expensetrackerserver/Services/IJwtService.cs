@@ -3,6 +3,7 @@ namespace expensetrackerserver.Services
 {
     public interface IJwtService
     {
-        string GenerateToken(User user);
+        string GenerateAccessToken(User user);
+        string GenerateRefreshToken();
     }
 }

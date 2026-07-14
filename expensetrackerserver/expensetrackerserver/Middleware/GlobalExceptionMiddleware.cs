@@ -39,6 +39,7 @@ namespace expensetrackerserver.Middleware
                 InvalidPasswordException => StatusCodes.Status400BadRequest,
                 InvalidPreferredCalendarException => StatusCodes.Status400BadRequest,
                 InvalidCredentialsException => StatusCodes.Status404NotFound,
+                InvalidRefreshTokenException => StatusCodes.Status404NotFound,
                 UserNotFoundException => StatusCodes.Status404NotFound,
                 CategoryAlreadyExistsException => StatusCodes.Status409Conflict,
                 CategoryNotFoundException => StatusCodes.Status404NotFound,

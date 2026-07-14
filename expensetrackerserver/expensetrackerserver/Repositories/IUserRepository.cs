@@ -10,10 +10,12 @@ namespace expensetrackerserver.Repositories
         Task<int> Create(User user);
 
         Task<User?> GetById(int id);
+        Task IncrementTokenVersion(int userId);
 
         Task<bool> EmailExists(string email);
 
         Task<bool> UsernameExists(string username);
+        Task<int?> GetTokenVersion(int userId);
 
     }
 }

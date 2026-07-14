@@ -2,6 +2,7 @@
 using expensetrackerserver.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -17,14 +18,15 @@ namespace expensetrackerserver.Services
             _jwtSettings = options.Value;
         }
 
-        public string GenerateToken(User user)
+        public string GenerateAccessToken(User user)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Name,user.Username),
                 new Claim(ClaimTypes.Email,user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim("tokenVersion",user.TokenVersion.ToString())
             };
 
             var key = new SymmetricSecurityKey(
@@ -43,6 +45,14 @@ namespace expensetrackerserver.Services
              );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
         }
     }
 }
