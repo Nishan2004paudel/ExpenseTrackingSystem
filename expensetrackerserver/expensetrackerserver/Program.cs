@@ -9,6 +9,7 @@ using expensetrackerserver.Settings;
 using Microsoft.AspNetCore.Mvc;
 using expensetrackerserver.DTOs;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,7 @@ builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();
 builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 builder.Services.AddControllers();
 builder.Services.Configure<JwtSettings>(
@@ -106,6 +108,28 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(jwtSettings.Secret)),
         ClockSkew = TimeSpan.Zero
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            var userRepo = context.HttpContext.RequestServices
+                .GetRequiredService<IUserRepository>();
+            var userId = int.Parse(context.Principal!.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            var tokenVersion = int.Parse(context.Principal.FindFirst("tokenVersion")!.Value);
+
+            var currentVersion = await userRepo.GetTokenVersion(userId);
+            if (currentVersion == null)
+            {
+                context.Fail("User no longer exists.");
+                return;
+            }
+            if (tokenVersion != currentVersion)
+            {
+                context.Fail("Token has been invalidated");
+            }
+        }
     };
 });
 

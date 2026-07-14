@@ -8,11 +8,13 @@ namespace expensetrackerserver.Services
     {
         private readonly IUserRepository _repo;
         private readonly IJwtService _jwtService;
+        private readonly IRefreshTokenRepository _refreshRepo;
 
-        public AuthService(IUserRepository repo, IJwtService jwtService)
+        public AuthService(IUserRepository repo, IJwtService jwtService, IRefreshTokenRepository refreshRepo)
         {
             _repo = repo;
             _jwtService = jwtService;
+            _refreshRepo = refreshRepo;
         }
 
         public async Task<UserDetailDto> Register(RegisterUserDto dto)
@@ -84,13 +86,25 @@ namespace expensetrackerserver.Services
 
             if (user == null)
             {
-                throw new InvalidCredentialsException();
+                throw new InvalidCredentialsException("Invalid username/email or password.");
             }
 
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
             {
-                throw new InvalidCredentialsException();
+                throw new InvalidCredentialsException("Invalid username/email or password.");
             }
+
+            var accessToken = _jwtService.GenerateAccessToken(user);
+            var refreshToken = _jwtService.GenerateRefreshToken();
+
+            var refreshTokenEntity = new RefreshToken
+            {
+                UserId = user.UserId,
+                Token = refreshToken,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            };
+
+            await _refreshRepo.Create(refreshTokenEntity);
 
             return new LoginResponseDto
             {
@@ -105,7 +119,8 @@ namespace expensetrackerserver.Services
                     PreferredCalendar = user.PreferredCalendar,
                     Role = user.Role
                 },
-                Token = _jwtService.GenerateToken(user)
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
             };
         }
         public async Task<UserDetailDto> GetUserDetail(int userId)
@@ -127,6 +142,65 @@ namespace expensetrackerserver.Services
                 PreferredCalendar = user.PreferredCalendar,
                 Role = user.Role
             };
+        }
+
+        public async Task<RefreshTokenResponseDto> Refresh(string refreshToken)
+        {
+            var storedToken = await _refreshRepo.GetActiveByToken(refreshToken);
+
+            if (storedToken == null)
+            {
+                throw new InvalidRefreshTokenException("Invalid refresh token.");
+            }
+            if (storedToken.ExpiresAt <= DateTime.UtcNow)
+            {
+                throw new InvalidRefreshTokenException("Refresh token expired.");
+            }
+            var user = await _repo.GetById(storedToken.UserId);
+            if (user == null)
+            {
+                throw new UserNotFoundException();
+            }
+
+            await _refreshRepo.Revoke(storedToken.RefreshTokenId);
+
+            var accessToken = _jwtService.GenerateAccessToken(user);
+            var newRefreshToken = _jwtService.GenerateRefreshToken();
+
+            await _refreshRepo.Create(new RefreshToken
+            {
+                UserId = user.UserId,
+                Token = newRefreshToken,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            });
+
+            return new RefreshTokenResponseDto
+            {
+                AccessToken = accessToken,
+                RefreshToken = newRefreshToken
+            };
+        }
+
+        public async Task Logout(string refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                return;
+            }
+            var storedToken = await _refreshRepo.GetActiveByToken(refreshToken);
+
+            if (storedToken == null)
+            {
+                return;
+            }
+
+            await _refreshRepo.Revoke(storedToken.RefreshTokenId);
+        }
+
+        public async Task LogoutEverywhere(int userId)
+        {
+            await _repo.IncrementTokenVersion(userId);
+            await _refreshRepo.RevokeAllByUserId(userId);
         }
     }
 }
