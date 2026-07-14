@@ -21,5 +21,8 @@
 
         public string Role { get; set; } = "User";
         public int TokenVersion { get; set; }
+        public bool IsEmailVerified { get; set; }
+        public string? EmailVerificationToken { get; set; }
+        public DateTime? EmailVerificationExpiresAt { get; set; }
     }
 }
