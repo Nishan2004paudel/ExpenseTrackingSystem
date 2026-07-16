@@ -35,15 +35,19 @@ namespace expensetrackerserver.Middleware
             int statusCode = exception switch
             {
                 EmailAlreadyExistsException => StatusCodes.Status409Conflict,
+                EmailAlreadyVerifiedException => StatusCodes.Status409Conflict,
                 UsernameAlreadyExistsException => StatusCodes.Status409Conflict,
                 InvalidPasswordException => StatusCodes.Status400BadRequest,
                 InvalidPreferredCalendarException => StatusCodes.Status400BadRequest,
                 InvalidCredentialsException => StatusCodes.Status404NotFound,
                 InvalidRefreshTokenException => StatusCodes.Status404NotFound,
+                InvalidEmailVerificationException => StatusCodes.Status404NotFound,
                 UserNotFoundException => StatusCodes.Status404NotFound,
                 CategoryAlreadyExistsException => StatusCodes.Status409Conflict,
                 CategoryNotFoundException => StatusCodes.Status404NotFound,
+                EmailNotVerifiedException => StatusCodes.Status404NotFound,
                 CategoryAccessDeniedException => StatusCodes.Status403Forbidden,
+                VerificationLinkExpiredException => StatusCodes.Status403Forbidden,
                 BudgetAlreadyExistsException => StatusCodes.Status409Conflict,
                 BudgetNotFoundException => StatusCodes.Status404NotFound,
                 BudgetAccessDeniedException => StatusCodes.Status403Forbidden,
@@ -60,7 +64,11 @@ namespace expensetrackerserver.Middleware
                 Message = exception.Message
             };
 
-            var json = JsonSerializer.Serialize(response);
+            var json = JsonSerializer.Serialize(response,
+                new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
 
             await context.Response.WriteAsync(json);
         }

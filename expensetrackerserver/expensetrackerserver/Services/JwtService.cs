@@ -49,6 +49,15 @@ namespace expensetrackerserver.Services
 
         public string GenerateRefreshToken()
         {
+            return GenerateSecureToken();
+        }
+
+        public string GenerateEmailVerificationToken()
+        {
+            return GenerateSecureToken();
+        }
+        public string GenerateSecureToken()
+        {
             var randomBytes = new byte[64];
             using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomBytes);
