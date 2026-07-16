@@ -9,5 +9,8 @@ namespace expensetrackerserver.Services
         Task<RefreshTokenResponseDto> Refresh(string refreshToken);
         Task Logout(string refreshToken);
         Task LogoutEverywhere(int userId);
+        Task VerifyEmail(string token);
+        Task ResendVerificationEmail(ResendVerificationEmailDto dto);
+        Task ResendVerificationByEmail(ResendVerificationByEmailDto dto);
     }
 }
