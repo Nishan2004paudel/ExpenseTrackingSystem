@@ -2,6 +2,7 @@
 using expensetrackerserver.Exceptions;
 using expensetrackerserver.Models;
 using expensetrackerserver.Repositories;
+using System.Security.Cryptography;
 namespace expensetrackerserver.Services
 {
     public class AuthService : IAuthService
@@ -9,12 +10,14 @@ namespace expensetrackerserver.Services
         private readonly IUserRepository _repo;
         private readonly IJwtService _jwtService;
         private readonly IRefreshTokenRepository _refreshRepo;
+        private readonly IEmailService _emailService;
 
-        public AuthService(IUserRepository repo, IJwtService jwtService, IRefreshTokenRepository refreshRepo)
+        public AuthService(IUserRepository repo, IJwtService jwtService, IRefreshTokenRepository refreshRepo, IEmailService emailService)
         {
             _repo = repo;
             _jwtService = jwtService;
             _refreshRepo = refreshRepo;
+            _emailService = emailService;
         }
 
         public async Task<UserDetailDto> Register(RegisterUserDto dto)
@@ -30,6 +33,9 @@ namespace expensetrackerserver.Services
             {
                 throw new UsernameAlreadyExistsException();
             }
+
+            var verificationToken = _jwtService.GenerateEmailVerificationToken();
+            var expiresAt = DateTime.UtcNow.AddHours(24);
             var user = new User
             {
                 Username = dto.Username,
@@ -38,9 +44,13 @@ namespace expensetrackerserver.Services
                 FullName = dto.FullName,
                 Profession = dto.Profession,
                 PreferredCalendar = dto.PreferredCalendar,
-                Role = "User"
+                Role = "User",
+                IsEmailVerified = false,
+                EmailVerificationToken = verificationToken,
+                EmailVerificationExpiresAt = expiresAt
             };
             int newUserId = await _repo.Create(user);
+            await _emailService.SendVerificationEmailAsync(user.Email, user.FullName, verificationToken);
 
             return new UserDetailDto
             {
@@ -92,6 +102,11 @@ namespace expensetrackerserver.Services
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
             {
                 throw new InvalidCredentialsException("Invalid username/email or password.");
+            }
+
+            if (!user.IsEmailVerified)
+            {
+                throw new EmailNotVerifiedException("Please verify your email before logging in.");
             }
 
             var accessToken = _jwtService.GenerateAccessToken(user);
@@ -201,6 +216,72 @@ namespace expensetrackerserver.Services
         {
             await _repo.IncrementTokenVersion(userId);
             await _refreshRepo.RevokeAllByUserId(userId);
+        }
+
+        public async Task VerifyEmail(string token)
+        {
+            var user = await _repo.GetByEmailVerificationToken(token);
+            if (user == null)
+            {
+                throw new InvalidEmailVerificationException("Invalid verification token.");
+            }
+            if (user.IsEmailVerified)
+            {
+                throw new EmailAlreadyVerifiedException("Email already Verified.");
+            }
+            if (user.EmailVerificationExpiresAt == null || user.EmailVerificationExpiresAt < DateTime.UtcNow)
+            {
+                throw new VerificationLinkExpiredException("Verification Link Expired.");
+            }
+            await _repo.VerifyEmail(user.UserId);
+        }
+
+        public async Task ResendVerificationEmail(ResendVerificationEmailDto dto)
+        {
+            var user = await _repo.GetById(dto.UserId);
+            if (user == null)
+            {
+                throw new UserNotFoundException();
+            }
+            if (user.IsEmailVerified)
+            {
+                throw new EmailAlreadyVerifiedException("Email already Verified.");
+            }
+            if (!user.Email.Equals(dto.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                if (await _repo.EmailExists(dto.Email))
+                {
+                    throw new EmailAlreadyExistsException();
+                }
+
+                await _repo.UpdateEmail(user.UserId, dto.Email);
+                user.Email = dto.Email;
+            }
+
+            var verificationToken = _jwtService.GenerateEmailVerificationToken();
+            var expiresAt = DateTime.UtcNow.AddHours(24);
+
+            await _repo.UpdateEmailVerificationToken(user.UserId, verificationToken, expiresAt);
+            await _emailService.SendVerificationEmailAsync(user.Email, user.FullName, verificationToken);
+        }
+
+        public async Task ResendVerificationByEmail(ResendVerificationByEmailDto dto)
+        {
+            var user = await _repo.GetByEmail(dto.Email);
+            if (user == null)
+            {
+                return;
+            }
+            if (user.IsEmailVerified)
+            {
+                return;
+            }
+
+            var verificationToken = _jwtService.GenerateEmailVerificationToken();
+            var expiresAt = DateTime.UtcNow.AddHours(24);
+
+            await _repo.UpdateEmailVerificationToken(user.UserId, verificationToken, expiresAt);
+            await _emailService.SendVerificationEmailAsync(user.Email, user.FullName, verificationToken);
         }
     }
 }

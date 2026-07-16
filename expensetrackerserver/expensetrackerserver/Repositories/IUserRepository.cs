@@ -16,6 +16,12 @@ namespace expensetrackerserver.Repositories
 
         Task<bool> UsernameExists(string username);
         Task<int?> GetTokenVersion(int userId);
+        Task<User?> GetByEmailVerificationToken(string token);
+        Task VerifyEmail(int userId);
+
+        Task<User?> GetByEmail(string email);
+        Task UpdateEmailVerificationToken(int userId, string token, DateTime expiresAt);
+        Task UpdateEmail(int userId, string email);
 
     }
 }

@@ -74,3 +74,6 @@ D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\obj\
 D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\obj\Debug\net8.0\ref\expensetrackerserver.dll
 D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\BCrypt-Net-Next.dll
 D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
+D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\MailKit.dll
+D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\MimeKit.dll
