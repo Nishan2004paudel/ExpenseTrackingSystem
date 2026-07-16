@@ -4,6 +4,7 @@ using expensetrackerserver.Services;
 using expensetrackerserver.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using expensetrackerserver.Exceptions;
 
 namespace expensetrackerserver.Controllers
 {
@@ -13,9 +14,11 @@ namespace expensetrackerserver.Controllers
     {
         private readonly IAuthService _service;
 
+
         public AuthController(IAuthService service)
         {
             _service = service;
+
         }
 
         [HttpPost("register")]
@@ -61,7 +64,7 @@ namespace expensetrackerserver.Controllers
             var refreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(refreshToken))
             {
-                return Unauthorized("Refresh token missing.");
+                throw new InvalidRefreshTokenException("Refresh token missing.");
             }
 
             var tokens = await _service.Refresh(refreshToken);
@@ -78,6 +81,16 @@ namespace expensetrackerserver.Controllers
                 });
             tokens.RefreshToken = string.Empty;
             return Ok(tokens);
+        }
+
+        [HttpGet("verify/email")]
+        public async Task<IActionResult> VerifyEmail([FromQuery] string token)
+        {
+            await _service.VerifyEmail(token);
+            return Ok(new MessageResponseDto
+            {
+                Message = "Email Verified Successfully."
+            });
         }
 
 
@@ -118,5 +131,27 @@ namespace expensetrackerserver.Controllers
                 });
             return NoContent();
         }
+
+
+        [HttpPost("resend-verification")]
+        public async Task<IActionResult> ResendVerificationEmail(ResendVerificationEmailDto dto)
+        {
+            await _service.ResendVerificationEmail(dto);
+            return Ok(new MessageResponseDto
+            {
+                Message = "Verification email sent successfully."
+            });
+        }
+
+        [HttpPost("resend-verification-by-email")]
+        public async Task<IActionResult> ResendVerificationByEmail(ResendVerificationByEmailDto dto)
+        {
+            await _service.ResendVerificationByEmail(dto);
+            return Ok(new MessageResponseDto
+            {
+                Message = "If an unverified account exists for this email, a verification email has been sent."
+            });
+        }
+
     }
 }

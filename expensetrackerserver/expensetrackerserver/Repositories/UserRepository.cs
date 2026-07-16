@@ -30,7 +30,7 @@ namespace expensetrackerserver.Repositories
 
         public async Task<int> Create(User user)
         {
-            var sql = @"INSERT INTO [User] (Username,Email,Password, FullName,Profession, PreferredCalendar,Role) VALUES ( @Username, @Email,@Password, @FullName, @Profession, @PreferredCalendar,@Role);
+            var sql = @"INSERT INTO [User] (Username,Email,Password, FullName,Profession, PreferredCalendar,Role,IsEmailVerified,EmailVerificationToken,EmailVerificationExpiresAt) VALUES ( @Username, @Email,@Password, @FullName, @Profession, @PreferredCalendar,@Role,@IsEmailVerified,@EmailVerificationToken,@EmailVerificationExpiresAt);
                         SELECT CAST(SCOPE_IDENTITY() AS INT);";
             using var connection = _context.CreateConnection();
             return await connection.ExecuteScalarAsync<int>(sql, user);
@@ -85,6 +85,68 @@ namespace expensetrackerserver.Repositories
                 {
                     UserId = userId
                 });
+        }
+
+        public async Task<User?> GetByEmailVerificationToken(string token)
+        {
+            var sql = @"SELECT * FROM [User] WHERE EmailVerificationToken = @Token";
+            using var connection = _context.CreateConnection();
+            return await connection.QueryFirstOrDefaultAsync<User>(sql,
+                new
+                {
+                    Token = token
+                });
+        }
+
+        public async Task VerifyEmail(int userId)
+        {
+            var sql = @"UPDATE [User] SET IsEmailVerified =1, EmailVerificationToken = NULL, EmailVerificationExpiresAt=  NULL,UpdatedAt = GETDATE() WHERE UserId =@UserId;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql,
+                new
+                {
+                    UserId = userId
+                });
+        }
+
+
+        public async Task UpdateEmailVerificationToken(int userId, string token, DateTime expiresAt)
+        {
+            var sql = @"UPDATE [User] SET EmailVerificationToken = @Token, EmailVerificationExpiresAt = @ExpiresAt, UpdatedAt = GETDATE() WHERE UserId = @UserId;";
+
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(
+                sql,
+                new
+                {
+                    UserId = userId,
+                    Token = token,
+                    ExpiresAt = expiresAt
+                });
+        }
+
+        public async Task UpdateEmail(int userId, string email)
+        {
+            var sql = @"UPDATE [User] SET Email = @Email, UpdatedAt = GETDATE() WHERE UserId = @UserId;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId,
+                Email = email
+            });
+        }
+
+        public async Task<User?> GetByEmail(string email)
+        {
+            var sql = @"SELECT * FROM [User] WHERE Email = @Email";
+            using var connection = _context.CreateConnection();
+            return await connection.QueryFirstOrDefaultAsync<User>(
+                sql,
+                new
+                {
+                    Email = email
+                });
+
         }
     }
 }

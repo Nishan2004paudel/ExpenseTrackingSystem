@@ -1,0 +1,87 @@
+<main class="min-h-screen flex items-center justify-center px-4 py-8 bg-background">
+    <div
+        class="w-full max-w-[480px] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg p-6 md:p-8 text-center">
+
+        <div class="flex items-center justify-center gap-2 mb-6">
+            <span class="material-symbols-outlined text-primary text-[28px]">account_balance_wallet</span>
+            <span class="text-xl font-bold text-on-background">HisabKitab</span>
+        </div>
+
+        <span class="material-symbols-outlined text-primary text-[48px] mb-4 inline-block">mark_email_unread</span>
+
+        <h1 class="text-2xl font-bold text-on-background mb-2">Check your email</h1>
+        <ng-container *ngIf="userId() !== null; else noUserIdHeading">
+            <p class="text-on-surface-variant text-sm mb-1">We've sent a verification link to</p>
+
+            <ng-container *ngIf="!editingEmail(); else editForm">
+                <p class="text-on-background font-semibold mb-6">{{ email() }}</p>
+            </ng-container>
+        </ng-container>
+
+        <ng-template #noUserIdHeading>
+            <p class="text-on-surface-variant text-sm mb-6">
+                It looks like your email isn't verified yet.
+                <span *ngIf="email()">We last sent a link to <strong class="text-on-background">{{ email()
+                        }}</strong>.</span>
+            </p>
+        </ng-template>
+        <ng-template #editForm>
+            <div class="mb-6 text-left">
+                <label class="block text-sm font-semibold text-on-surface-variant mb-1" for="newEmail">New email
+                    address</label>
+                <input id="newEmail" type="email" [value]="newEmail()" (input)="newEmail.set($any($event.target).value)"
+                    class="w-full px-4 py-2 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+            </div>
+        </ng-template>
+
+        <p *ngIf="successMessage()" class="text-primary text-sm mb-4">{{ successMessage() }}</p>
+        <p *ngIf="errorMessage()" class="text-error text-sm mb-4">{{ errorMessage() }}</p>
+
+        <div class="space-y-3" *ngIf="userId() !== null; else noResend">
+            <button type="button" (click)="resend()" [disabled]="loading()"
+                class="w-full bg-primary text-on-primary py-2 rounded-lg font-bold hover:opacity-90 transition-all disabled:opacity-50">
+                {{ loading() ? 'Sending...' : (editingEmail() ? 'Save & Resend Verification' : 'Resend Verification
+                Email') }}
+            </button>
+
+            <button type="button" (click)="toggleEditEmail()"
+                class="w-full border border-outline-variant text-on-surface py-2 rounded-lg font-semibold hover:bg-surface-container-low transition-all">
+                {{ editingEmail() ? 'Cancel' : 'Change Email Address' }}
+            </button>
+        </div>
+
+        <ng-template #noResend>
+            <p class="text-on-surface-variant text-sm mb-6">
+                Please check your inbox (and spam folder) for the verification link we sent earlier.
+            </p>
+
+            <div class="border-t border-outline-variant pt-6 text-left">
+                <p class="text-sm font-semibold text-on-surface-variant mb-1">Link expired or never arrived?</p>
+                <p class="text-xs text-on-surface-variant mb-3">Enter your email below and we'll resend the verification
+                    link.</p>
+
+                <div class="flex gap-2">
+                    <input type="email" placeholder="Enter your email" [value]="resendByEmailInput()"
+                        (input)="resendByEmailInput.set($any($event.target).value)"
+                        class="flex-1 px-4 py-2 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm" />
+                    <button type="button" (click)="resendByEmail()"
+                        [disabled]="resendByEmailLoading() || !resendByEmailInput().trim()"
+                        class="bg-primary text-on-primary px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-90 transition-all disabled:opacity-50 whitespace-nowrap">
+                        {{ resendByEmailLoading() ? 'Sending...' : 'Resend' }}
+                    </button>
+                </div>
+
+                <p *ngIf="resendByEmailMessage()" class="text-primary text-xs mt-3">{{ resendByEmailMessage() }}</p>
+
+                <p class="text-xs text-on-surface-variant mt-4">
+                    Entered the wrong email during registration? You'll need to
+                    <a routerLink="/register" class="text-primary font-semibold hover:underline">register again</a>.
+                </p>
+            </div>
+        </ng-template>
+
+        <p class="text-center text-sm text-on-surface-variant mt-6">
+            Already verified? <a routerLink="/login" class="text-primary font-semibold hover:underline">Go to Login</a>
+        </p>
+    </div>
+</main>

@@ -72,6 +72,16 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "expensetrackerserver.Controllers.AuthController",
+    "Method": "TestEmail",
+    "RelativePath": "api/Auth/test-email",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "expensetrackerserver.Controllers.BudgetController",
     "Method": "Create",
     "RelativePath": "api/Budget",
