@@ -41,7 +41,7 @@ namespace expensetrackerserver.Services
         }
         public async Task SendVerificationEmailAsync(string toEmail, string fullName, string verificationToken)
         {
-            var verificationLink = $"http://localhost:4200/verify-email?token={verificationToken}";
+            var verificationLink = $"http://localhost:4200/verify-email?token={Uri.EscapeDataString(verificationToken)}";
             var subject = "Verify your Expense Tracker account";
             var htmlBody = $@"
                 <h2>Welcome, {fullName}!</h2>

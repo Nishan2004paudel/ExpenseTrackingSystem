@@ -1,0 +1,46 @@
+<main class="min-h-screen flex items-center justify-center px-4 py-8 bg-background">
+  <div class="w-full max-w-[480px] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg p-6 md:p-8">
+
+    <div class="flex items-center justify-center gap-2 mb-6">
+      <span class="material-symbols-outlined text-primary text-[28px]">account_balance_wallet</span>
+      <span class="text-xl font-bold text-on-background">HisabKitab</span>
+    </div>
+
+    <ng-container *ngIf="auth.currentUser() as user; else loadingOrLoggedOut">
+      <h1 class="text-xl font-bold text-on-background mb-4 text-center">Welcome, {{ user.fullName }}</h1>
+
+      <div class="space-y-3 text-sm mb-6">
+        <div class="flex justify-between border-b border-outline-variant pb-2">
+          <span class="text-on-surface-variant">Username</span>
+          <span class="text-on-background font-medium">{{ user.username }}</span>
+        </div>
+        <div class="flex justify-between border-b border-outline-variant pb-2">
+          <span class="text-on-surface-variant">Email</span>
+          <span class="text-on-background font-medium">{{ user.email }}</span>
+        </div>
+        <div class="flex justify-between border-b border-outline-variant pb-2">
+          <span class="text-on-surface-variant">Profession</span>
+          <span class="text-on-background font-medium">{{ user.profession || '—' }}</span>
+        </div>
+        <div class="flex justify-between border-b border-outline-variant pb-2">
+          <span class="text-on-surface-variant">Preferred Calendar</span>
+          <span class="text-on-background font-medium">{{ user.preferredCalendar }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-on-surface-variant">Role</span>
+          <span class="text-on-background font-medium">{{ user.role }}</span>
+        </div>
+      </div>
+
+      <button type="button" (click)="logout()"
+              class="w-full bg-error text-on-error py-2 rounded-lg font-bold hover:opacity-90 transition-all">
+        Logout
+      </button>
+    </ng-container>
+
+    <ng-template #loadingOrLoggedOut>
+      <p class="text-on-surface-variant text-sm text-center">Loading your profile...</p>
+    </ng-template>
+
+  </div>
+</main>

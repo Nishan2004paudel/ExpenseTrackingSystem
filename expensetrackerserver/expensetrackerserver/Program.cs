@@ -36,6 +36,9 @@ builder.Services.Configure<JwtSettings>(
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("Email"));
 
+builder.Services.Configure<GoogleSettings>(
+    builder.Configuration.GetSection("Google"));
+
 var jwtSettings = builder.Configuration
     .GetSection("Jwt")
     .Get<JwtSettings>()

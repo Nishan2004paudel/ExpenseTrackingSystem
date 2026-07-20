@@ -1,6 +1,7 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
@@ -42,6 +43,15 @@ export class RegisterComponent {
     profession: [''],
     agreeToTerms: [false, Validators.requiredTrue]
   });
+  private passwordValue = toSignal(
+    this.form.controls.password.valueChanges,
+    { initialValue: '' }
+  );
+
+  hasMinLength = computed(() => (this.passwordValue() ?? '').length >= 8);
+  hasUppercase = computed(() => /[A-Z]/.test(this.passwordValue() ?? ''));
+  hasLowercase = computed(() => /[a-z]/.test(this.passwordValue() ?? ''));
+  hasDigit = computed(() => /[0-9]/.test(this.passwordValue() ?? ''));
   togglePassword() {
     this.showPassword.update(v => !v);
   }
@@ -57,7 +67,7 @@ export class RegisterComponent {
 
     const { agreeToTerms, ...payload } = this.form.value;
 
-this.auth.register(payload as any).subscribe({
+    this.auth.register(payload as any).subscribe({
       next: (user) => {
         this.loading.set(false);
         this.router.navigate(['/check-email'], {
