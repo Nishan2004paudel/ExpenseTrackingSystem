@@ -19,7 +19,7 @@ export class AuthService {
   isAuthenticated = signal<boolean>(false);
   currentUser = signal<UserDetail | null>(null);
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   register(payload: RegisterRequest) {
     return this.http.post<UserDetail>(
@@ -53,7 +53,25 @@ export class AuthService {
       .post(`${environment.apiUrl}/auth/logout`, {}, { withCredentials: true })
       .pipe(tap(() => this.clearSession()));
   }
-
+  refresh() {
+    return this.http
+      .post<{ accessToken: string; refreshToken: string }>(
+        `${environment.apiUrl}/auth/refresh`,
+        {},
+        { withCredentials: true }
+      )
+      .pipe(
+        tap(res => {
+          this.accessToken = res.accessToken;
+          this.isAuthenticated.set(true);
+        })
+      );
+  }
+  getMe() {
+    return this.http
+      .get<UserDetail>(`${environment.apiUrl}/auth/me`)
+      .pipe(tap(user => this.currentUser.set(user)));
+  }
   clearSession() {
     this.accessToken = null;
     this.currentUser.set(null);
@@ -69,6 +87,12 @@ export class AuthService {
     return this.http.post(
       `${environment.apiUrl}/auth/resend-verification-by-email`,
       payload
+    );
+  }
+  verifyEmail(token: string) {
+    return this.http.get(
+      `${environment.apiUrl}/auth/verify/email`,
+      { params: { token } }
     );
   }
 }

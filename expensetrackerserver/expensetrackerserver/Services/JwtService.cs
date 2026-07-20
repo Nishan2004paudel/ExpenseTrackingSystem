@@ -23,11 +23,16 @@ namespace expensetrackerserver.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Name,user.Username),
+                new Claim(ClaimTypes.Name,user.FullName?? user.Username?? user.Email),
                 new Claim(ClaimTypes.Email,user.Email),
                 new Claim(ClaimTypes.Role, user.Role),
                 new Claim("tokenVersion",user.TokenVersion.ToString())
             };
+
+            if (!string.IsNullOrWhiteSpace(user.Username))
+            {
+                claims.Add(new Claim("username", user.Username));
+            }
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_jwtSettings.Secret));

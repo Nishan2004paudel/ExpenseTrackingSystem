@@ -3,6 +3,9 @@ using expensetrackerserver.Exceptions;
 using expensetrackerserver.Models;
 using expensetrackerserver.Repositories;
 using System.Security.Cryptography;
+using Google.Apis.Auth;
+using Microsoft.Extensions.Options;
+using expensetrackerserver.Settings;
 namespace expensetrackerserver.Services
 {
     public class AuthService : IAuthService
@@ -11,13 +14,15 @@ namespace expensetrackerserver.Services
         private readonly IJwtService _jwtService;
         private readonly IRefreshTokenRepository _refreshRepo;
         private readonly IEmailService _emailService;
+        private readonly GoogleSettings _googleSettings;
 
-        public AuthService(IUserRepository repo, IJwtService jwtService, IRefreshTokenRepository refreshRepo, IEmailService emailService)
+        public AuthService(IUserRepository repo, IJwtService jwtService, IRefreshTokenRepository refreshRepo, IEmailService emailService, IOptions<GoogleSettings> googleSettings)
         {
             _repo = repo;
             _jwtService = jwtService;
             _refreshRepo = refreshRepo;
             _emailService = emailService;
+            _googleSettings = googleSettings.Value;
         }
 
         public async Task<UserDetailDto> Register(RegisterUserDto dto)
@@ -28,7 +33,7 @@ namespace expensetrackerserver.Services
             {
                 throw new EmailAlreadyExistsException();
             }
-
+            dto.Username = dto.Username.Trim();
             if (await _repo.UsernameExists(dto.Username))
             {
                 throw new UsernameAlreadyExistsException();
@@ -45,6 +50,7 @@ namespace expensetrackerserver.Services
                 Profession = dto.Profession,
                 PreferredCalendar = dto.PreferredCalendar,
                 Role = "User",
+                AuthProvider = "Local",
                 IsEmailVerified = false,
                 EmailVerificationToken = verificationToken,
                 EmailVerificationExpiresAt = expiresAt
@@ -60,7 +66,9 @@ namespace expensetrackerserver.Services
                 FullName = user.FullName,
                 Profession = user.Profession,
                 PreferredCalendar = user.PreferredCalendar,
-                Role = user.Role
+                Role = user.Role,
+                AuthProvider = user.AuthProvider,
+                HasPassword = !string.IsNullOrEmpty(user.Password)
             };
         }
 
@@ -99,6 +107,10 @@ namespace expensetrackerserver.Services
                 throw new InvalidCredentialsException("Invalid username/email or password.");
             }
 
+            if (string.IsNullOrEmpty(user.Password))
+            {
+                throw new InvalidCredentialsException("Please continue with Google or set a password first.");
+            }
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
             {
                 throw new InvalidCredentialsException("Invalid username/email or password.");
@@ -132,7 +144,9 @@ namespace expensetrackerserver.Services
                     FullName = user.FullName,
                     Profession = user.Profession,
                     PreferredCalendar = user.PreferredCalendar,
-                    Role = user.Role
+                    Role = user.Role,
+                    AuthProvider = user.AuthProvider,
+                    HasPassword = !string.IsNullOrEmpty(user.Password)
                 },
                 AccessToken = accessToken,
                 RefreshToken = refreshToken
@@ -155,7 +169,9 @@ namespace expensetrackerserver.Services
                 FullName = user.FullName,
                 Profession = user.Profession,
                 PreferredCalendar = user.PreferredCalendar,
-                Role = user.Role
+                Role = user.Role,
+                AuthProvider = user.AuthProvider,
+                HasPassword = !string.IsNullOrEmpty(user.Password)
             };
         }
 
@@ -282,6 +298,145 @@ namespace expensetrackerserver.Services
 
             await _repo.UpdateEmailVerificationToken(user.UserId, verificationToken, expiresAt);
             await _emailService.SendVerificationEmailAsync(user.Email, user.FullName, verificationToken);
+        }
+        public async Task<LoginResponseDto> GoogleLogin(GoogleLoginDto dto)
+        {
+            var payload = await GoogleJsonWebSignature.ValidateAsync(dto.IdToken,
+                new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[]
+                    {
+                        _googleSettings.ClientId
+                    }
+                });
+            if (!payload.EmailVerified)
+            {
+                throw new InvalidCredentialsException("Google account is not verified.");
+            }
+            var user = await _repo.GetByEmail(payload.Email);
+
+            if (user != null && !user.IsEmailVerified)
+            {
+                await _repo.VerifyEmail(user.UserId);
+                user.IsEmailVerified = true;
+            }
+        
+
+            if (user == null)
+            {
+                user = new User
+                {
+                    Email = payload.Email,
+                    FullName = payload.Name,
+                    Username = null,
+                    Password = null,
+                    Profession = null,
+                    PreferredCalendar = "English",
+                    Role = "User",
+                    AuthProvider = "Google",
+                    IsEmailVerified = true,
+                    EmailVerificationToken = null,
+                    EmailVerificationExpiresAt = null
+                };
+                var userId = await _repo.Create(user);
+                user = await _repo.GetById(userId);
+            }
+            if (user == null)
+            {
+                throw new InvalidOperationException("Failed to create Google account");
+            }
+            var accessToken = _jwtService.GenerateAccessToken(user);
+            var refreshToken = _jwtService.GenerateRefreshToken();
+
+            await _refreshRepo.Create(new RefreshToken
+            {
+                UserId = user.UserId,
+                Token = refreshToken,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            });
+
+            return new LoginResponseDto
+            {
+                Message = "Login successful.",
+                User = new UserDetailDto
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    Email = user.Email,
+                    FullName = user.FullName,
+                    Profession = user.Profession,
+                    PreferredCalendar = user.PreferredCalendar,
+                    Role = user.Role,
+                    AuthProvider = user.AuthProvider,
+                    HasPassword = !string.IsNullOrEmpty(user.Password)
+                },
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
+        }
+
+        public async Task<MessageResponseDto> SetupPassword(int userId, SetupPasswordDto dto)
+        {
+            var user = await _repo.GetById(userId);
+            if (user == null)
+            {
+                throw new UserNotFoundException();
+            }
+            if (!string.IsNullOrEmpty(user.Password))
+            {
+                throw new PasswordAlreadySetException();
+            }
+
+            ValidatePassword(dto.Password);
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+            await _repo.UpdatePassword(user.UserId, hashedPassword);
+            return new MessageResponseDto
+            {
+                Message = "Password has been set successfully."
+            };
+        }
+
+        public async Task<MessageResponseDto> SetupUsername(int userId, SetupUsernameDto dto)
+        {
+            var user = await _repo.GetById(userId);
+            if (user == null)
+            {
+                throw new UserNotFoundException();
+            }
+            if (!string.IsNullOrEmpty(user.Username))
+            {
+                throw new UsernameAlreadySetException();
+            }
+            dto.Username = dto.Username.Trim();
+            if (await _repo.UsernameExists(dto.Username))
+            {
+                throw new UsernameAlreadyExistsException();
+            }
+
+            await _repo.UpdateUsername(user.UserId, dto.Username);
+            return new MessageResponseDto
+            {
+                Message = "Username set successfully."
+            };
+        }
+
+        public async Task<MessageResponseDto> ChangePreferredCalendar(int userId, UpdatePreferredCalendarDto dto)
+        {
+            var user = await _repo.GetById(userId);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException();
+            }
+            dto.PreferredCalendar = dto.PreferredCalendar.Trim();
+            ValidatePreferredCalendar(dto.PreferredCalendar);
+
+            await _repo.UpdatePreferredCalendar(user.UserId, dto.PreferredCalendar);
+
+            return new MessageResponseDto
+            {
+                Message = "Preferred calendar updated successfully"
+            };
         }
     }
 }
