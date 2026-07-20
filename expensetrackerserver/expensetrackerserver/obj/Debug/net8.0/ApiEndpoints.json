@@ -73,12 +73,50 @@
   },
   {
     "ContainingType": "expensetrackerserver.Controllers.AuthController",
-    "Method": "TestEmail",
-    "RelativePath": "api/Auth/test-email",
+    "Method": "ResendVerificationEmail",
+    "RelativePath": "api/Auth/resend-verification",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.ResendVerificationEmailDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.AuthController",
+    "Method": "ResendVerificationByEmail",
+    "RelativePath": "api/Auth/resend-verification-by-email",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.ResendVerificationByEmailDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.AuthController",
+    "Method": "VerifyEmail",
+    "RelativePath": "api/Auth/verify/email",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "token",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {

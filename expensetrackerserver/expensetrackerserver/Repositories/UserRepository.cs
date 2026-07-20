@@ -15,7 +15,7 @@ namespace expensetrackerserver.Repositories
 
         public async Task<IEnumerable<UserDetailDto>> GetAll()
         {
-            var sql = "SELECT UserId, Username, Email, FullName,Profession, PreferredCalendar,Role FROM [User]";
+            var sql = "SELECT UserId, Username, Email, FullName,Profession, PreferredCalendar,Role,AuthProvider FROM [User]";
             using var connection = _context.CreateConnection();
             return await connection.QueryAsync<UserDetailDto>(sql);
         }
@@ -30,7 +30,7 @@ namespace expensetrackerserver.Repositories
 
         public async Task<int> Create(User user)
         {
-            var sql = @"INSERT INTO [User] (Username,Email,Password, FullName,Profession, PreferredCalendar,Role,IsEmailVerified,EmailVerificationToken,EmailVerificationExpiresAt) VALUES ( @Username, @Email,@Password, @FullName, @Profession, @PreferredCalendar,@Role,@IsEmailVerified,@EmailVerificationToken,@EmailVerificationExpiresAt);
+            var sql = @"INSERT INTO [User] (Username,Email,Password, FullName,Profession, PreferredCalendar,Role,AuthProvider,IsEmailVerified,EmailVerificationToken,EmailVerificationExpiresAt) VALUES ( @Username, @Email,@Password, @FullName, @Profession, @PreferredCalendar,@Role,@AuthProvider,@IsEmailVerified,@EmailVerificationToken,@EmailVerificationExpiresAt);
                         SELECT CAST(SCOPE_IDENTITY() AS INT);";
             using var connection = _context.CreateConnection();
             return await connection.ExecuteScalarAsync<int>(sql, user);
@@ -147,6 +147,39 @@ namespace expensetrackerserver.Repositories
                     Email = email
                 });
 
+        }
+
+        public async Task UpdatePassword(int userId, string Password)
+        {
+            var sql = @"UPDATE [User] SET Password = @Password, UpdatedAt = GETDATE() WHERE UserId = @UserId;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId,
+                Password = Password
+            });
+        }
+
+        public async Task UpdateUsername(int userId, string username)
+        {
+            var sql = @"UPDATE [User] SET Username = @Username , UpdatedAt = GETDATE() WHERE UserId = @UserId;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId,
+                Username = username
+            });
+        }
+
+        public async Task UpdatePreferredCalendar(int userId, string preferredCalendar)
+        {
+            var sql = @"UPDATE [User] SET PreferredCalendar = @PreferredCalendar, UpdatedAt = GETDATE() WHERE UserId = @UserId;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId,
+                PreferredCalendar = preferredCalendar
+            });
         }
     }
 }

@@ -35,8 +35,12 @@ namespace expensetrackerserver.Middleware
             int statusCode = exception switch
             {
                 EmailAlreadyExistsException => StatusCodes.Status409Conflict,
+                ExpenseAccessDeniedException => StatusCodes.Status403Forbidden,
+                ExpenseNotFoundException => StatusCodes.Status404NotFound,
                 EmailAlreadyVerifiedException => StatusCodes.Status409Conflict,
                 UsernameAlreadyExistsException => StatusCodes.Status409Conflict,
+                UsernameAlreadySetException => StatusCodes.Status409Conflict,
+                PasswordAlreadySetException => StatusCodes.Status409Conflict,
                 InvalidPasswordException => StatusCodes.Status400BadRequest,
                 InvalidPreferredCalendarException => StatusCodes.Status400BadRequest,
                 InvalidCredentialsException => StatusCodes.Status404NotFound,

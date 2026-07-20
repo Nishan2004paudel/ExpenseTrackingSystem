@@ -7,9 +7,9 @@ namespace expensetrackerserver.DTOs
 
         public int UserId { get; set; }
 
-        public string Username { get; set; } = string.Empty;
+        public string? Username { get; set; }
 
-
+        public string AuthProvider { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
 
         public string FullName { get; set; } = string.Empty;
@@ -19,6 +19,7 @@ namespace expensetrackerserver.DTOs
         public string PreferredCalendar { get; set; } = string.Empty;
 
         public string Role { get; set; } = string.Empty;
+        public bool HasPassword { get; set; }
 
     }
 }

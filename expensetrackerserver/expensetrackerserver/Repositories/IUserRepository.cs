@@ -23,5 +23,8 @@ namespace expensetrackerserver.Repositories
         Task UpdateEmailVerificationToken(int userId, string token, DateTime expiresAt);
         Task UpdateEmail(int userId, string email);
 
+        Task UpdatePassword(int userId, string password);
+        Task UpdateUsername(int userId, string username);
+        Task UpdatePreferredCalendar(int userId, string PreferredCalendar);
     }
 }
