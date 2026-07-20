@@ -13,12 +13,26 @@ namespace expensetrackerserver.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _service;
+        private readonly IWebHostEnvironment _environment;
 
-
-        public AuthController(IAuthService service)
+        public AuthController(IAuthService service, IWebHostEnvironment environment)
         {
             _service = service;
+            _environment = environment;
+        }
 
+        private CookieOptions GetRefreshCookieOptions()
+        {
+
+            return new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = _environment.IsDevelopment()
+                    ? SameSiteMode.None
+                    : SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            };
         }
 
         [HttpPost("register")]
@@ -37,13 +51,7 @@ namespace expensetrackerserver.Controllers
             Response.Cookies.Append(
                 "refreshToken",
                 response.RefreshToken,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
+                GetRefreshCookieOptions());
             response.RefreshToken = string.Empty;
             return Ok(response);
         }
@@ -72,13 +80,7 @@ namespace expensetrackerserver.Controllers
             Response.Cookies.Append(
                 "refreshToken",
                 tokens.RefreshToken,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
+       GetRefreshCookieOptions());
             tokens.RefreshToken = string.Empty;
             return Ok(tokens);
         }
@@ -105,12 +107,7 @@ namespace expensetrackerserver.Controllers
 
             Response.Cookies.Delete(
                 "refreshToken",
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict
-                });
+GetRefreshCookieOptions());
             return NoContent();
         }
 
@@ -123,12 +120,7 @@ namespace expensetrackerserver.Controllers
 
             Response.Cookies.Delete(
                 "refreshToken",
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict
-                });
+GetRefreshCookieOptions());
             return NoContent();
         }
 
@@ -153,5 +145,40 @@ namespace expensetrackerserver.Controllers
             });
         }
 
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin(GoogleLoginDto dto)
+        {
+            var response = await _service.GoogleLogin(dto);
+            Response.Cookies.Append("refreshToken", response.RefreshToken, GetRefreshCookieOptions());
+            response.RefreshToken = string.Empty;
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPost("setup-password")]
+        public async Task<IActionResult> SetupPassword(SetupPasswordDto dto)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var response = await _service.SetupPassword(userId, dto);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPost("setup-username")]
+        public async Task<IActionResult> SetupUsername(SetupUsernameDto dto)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var response = await _service.SetupUsername(userId, dto);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPut("preferred-calendar")]
+        public async Task<IActionResult> ChangePreferredCalendar(UpdatePreferredCalendarDto dto)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var response = await _service.ChangePreferredCalendar(userId, dto);
+            return Ok(response);
+        }
     }
 }

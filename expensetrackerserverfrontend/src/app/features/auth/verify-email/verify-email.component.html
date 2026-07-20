@@ -1,0 +1,33 @@
+<main class="min-h-screen flex items-center justify-center px-4 py-8 bg-background">
+  <div class="w-full max-w-[480px] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg p-6 md:p-8 text-center">
+
+    <div class="flex items-center justify-center gap-2 mb-6">
+      <span class="material-symbols-outlined text-primary text-[28px]">account_balance_wallet</span>
+      <span class="text-xl font-bold text-on-background">HisabKitab</span>
+    </div>
+
+    <!-- Loading state -->
+    <ng-container *ngIf="state() === 'loading'">
+      <span class="material-symbols-outlined text-outline text-[48px] mb-4 inline-block animate-spin">progress_activity</span>
+      <h1 class="text-xl font-bold text-on-background mb-2">Verifying your email...</h1>
+      <p class="text-on-surface-variant text-sm">Please wait a moment.</p>
+    </ng-container>
+
+    <!-- Success state -->
+    <ng-container *ngIf="state() === 'success'">
+      <span class="material-symbols-outlined text-primary text-[48px] mb-4 inline-block">check_circle</span>
+      <h1 class="text-xl font-bold text-on-background mb-2">Email Verified!</h1>
+      <p class="text-on-surface-variant text-sm mb-6">Redirecting you to login...</p>
+      <a routerLink="/login" class="text-primary font-semibold hover:underline text-sm">Go to Login now</a>
+    </ng-container>
+
+    <!-- Error state -->
+    <ng-container *ngIf="state() === 'error'">
+      <span class="material-symbols-outlined text-error text-[48px] mb-4 inline-block">error</span>
+      <h1 class="text-xl font-bold text-on-background mb-2">Verification Failed</h1>
+      <p class="text-on-surface-variant text-sm mb-6">{{ errorMessage() }}</p>
+      <a routerLink="/check-email" class="text-primary font-semibold hover:underline text-sm">Resend Verification Email</a>
+    </ng-container>
+
+  </div>
+</main>

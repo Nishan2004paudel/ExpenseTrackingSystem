@@ -40,10 +40,10 @@ export class CheckEmailComponent {
             // Came from a failed login (email-not-verified) — no userId available
             this.email.set(state.email);
             this.newEmail.set(state.email);
-        } else {
-            // No state at all (e.g. page refreshed) — nothing to show
-            this.router.navigate(['/login']);
         }
+        // else: no state at all (refresh, direct link, or failed verify-email
+        // redirect) — just render the page with the manual resend-by-email
+        // section empty, letting the user type their email in themselves.
     }
     toggleEditEmail() {
         this.editingEmail.update(v => !v);
@@ -75,25 +75,25 @@ export class CheckEmailComponent {
         });
     }
     resendByEmail() {
-    const emailToUse = this.resendByEmailInput().trim();
-    if (!emailToUse) return;
+        const emailToUse = this.resendByEmailInput().trim();
+        if (!emailToUse) return;
 
-    this.resendByEmailLoading.set(true);
-    this.resendByEmailMessage.set('');
+        this.resendByEmailLoading.set(true);
+        this.resendByEmailMessage.set('');
 
-    this.auth.resendVerificationByEmail({ email: emailToUse }).subscribe({
-      next: () => {
-        this.resendByEmailLoading.set(false);
-        this.resendByEmailMessage.set(
-          'If an unverified account exists for this email, a verification email has been sent.'
-        );
-      },
-      error: () => {
-        this.resendByEmailLoading.set(false);
-        this.resendByEmailMessage.set(
-          'Something went wrong. Please try again.'
-        );
-      }
-    });
-  }
+        this.auth.resendVerificationByEmail({ email: emailToUse }).subscribe({
+            next: () => {
+                this.resendByEmailLoading.set(false);
+                this.resendByEmailMessage.set(
+                    'If an unverified account exists for this email, a verification email has been sent.'
+                );
+            },
+            error: () => {
+                this.resendByEmailLoading.set(false);
+                this.resendByEmailMessage.set(
+                    'Something went wrong. Please try again.'
+                );
+            }
+        });
+    }
 }
