@@ -77,3 +77,10 @@ D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\
 D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
 D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\MailKit.dll
 D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\MimeKit.dll
+D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\Google.Apis.dll
+D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\Google.Apis.Auth.dll
+D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\Google.Apis.Core.dll
+D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\Newtonsoft.Json.dll
+D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\System.CodeDom.dll
+D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\System.Management.dll
+D:\Projects\ExpenseTrackingSystem\expensetrackerserver\expensetrackerserver\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Management.dll

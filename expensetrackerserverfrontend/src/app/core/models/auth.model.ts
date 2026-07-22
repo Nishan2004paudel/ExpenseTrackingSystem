@@ -58,3 +58,19 @@ export interface SetupUsernameRequest {
 export interface UpdatePreferredCalendarRequest {
   preferredCalendar: string;
 }
+
+export interface ForgotPasswordRequest {
+  identifier: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}
+export interface UpdateFullNameRequest {
+  fullName: string;
+}
+
+export interface UpdateProfessionRequest {
+  profession?: string;
+}

@@ -57,6 +57,9 @@ namespace expensetrackerserver.Middleware
                 BudgetAccessDeniedException => StatusCodes.Status403Forbidden,
                 InvalidOperationException => StatusCodes.Status400BadRequest,
                 InvalidExpenseDateException => StatusCodes.Status400BadRequest,
+                InvalidPasswordResetException => StatusCodes.Status400BadRequest,
+                InvalidFullNameException=>StatusCodes.Status400BadRequest,
+                PasswordResetExpiredException => StatusCodes.Status403Forbidden,
                 _ => StatusCodes.Status500InternalServerError
             };
 

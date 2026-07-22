@@ -61,6 +61,11 @@ namespace expensetrackerserver.Services
         {
             return GenerateSecureToken();
         }
+
+        public string GeneratePasswordResetToken()
+        {
+            return GenerateSecureToken();
+        }
         public string GenerateSecureToken()
         {
             var randomBytes = new byte[64];
