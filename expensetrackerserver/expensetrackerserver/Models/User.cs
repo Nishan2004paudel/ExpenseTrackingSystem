@@ -25,5 +25,11 @@
         public string? EmailVerificationToken { get; set; }
         public DateTime? EmailVerificationExpiresAt { get; set; }
         public string AuthProvider { get; set; } = "Local";
+
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetExpiresAt { get; set; }
+        public string? PendingEmail { get; set; }
+        public string? PendingEmailVerificationToken { get; set; }
+        public DateTime? PendingEmailVerificationExpiresAt { get; set; }
     }
 }

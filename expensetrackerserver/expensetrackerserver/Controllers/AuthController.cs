@@ -56,14 +56,7 @@ namespace expensetrackerserver.Controllers
             return Ok(response);
         }
 
-        [Authorize]
-        [HttpGet("me")]
-        public async Task<IActionResult> Me()
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var user = await _service.GetUserDetail(userId);
-            return Ok(user);
-        }
+ 
 
 
         [HttpPost("refresh")]
@@ -154,30 +147,24 @@ GetRefreshCookieOptions());
             return Ok(response);
         }
 
-        [Authorize]
-        [HttpPost("setup-password")]
-        public async Task<IActionResult> SetupPassword(SetupPasswordDto dto)
+
+
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var response = await _service.SetupPassword(userId, dto);
+            var response = await _service.ForgotPassword(dto);
             return Ok(response);
         }
 
-        [Authorize]
-        [HttpPost("setup-username")]
-        public async Task<IActionResult> SetupUsername(SetupUsernameDto dto)
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var response = await _service.SetupUsername(userId, dto);
-            return Ok(response);
-        }
+            var response = await _service.ResetPassword(dto);
+            Response.Cookies.Delete(
+     "refreshToken",
+     GetRefreshCookieOptions());
 
-        [Authorize]
-        [HttpPut("preferred-calendar")]
-        public async Task<IActionResult> ChangePreferredCalendar(UpdatePreferredCalendarDto dto)
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var response = await _service.ChangePreferredCalendar(userId, dto);
             return Ok(response);
         }
     }

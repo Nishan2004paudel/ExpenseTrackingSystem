@@ -181,5 +181,60 @@ namespace expensetrackerserver.Repositories
                 PreferredCalendar = preferredCalendar
             });
         }
+
+        public async Task UpdatePasswordResetToken(int userId, string token, DateTime expiresAt)
+        {
+            var sql = @"UPDATE [User] SET PasswordResetToken = @Token, PasswordResetExpiresAt = @ExpiresAt, UpdatedAt = GETDATE() WHERE UserId = @UserId;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId,
+                Token = token,
+                ExpiresAt = expiresAt
+            });
+        }
+
+        public async Task<User?> GetByPasswordResetToken(string token)
+        {
+            var sql = @"SELECT * FROM [User] WHERE PasswordResetToken = @Token;";
+            using var connection = _context.CreateConnection();
+            return await connection.QueryFirstOrDefaultAsync<User>(sql,
+                new
+                {
+                    Token = token
+                });
+        }
+
+        public async Task ClearPasswordResetToken(int userId)
+        {
+            var sql = @"UPDATE [User] SET PasswordResetToken = NULL, PasswordResetExpiresAt = NULL,UpdatedAt = GETDATE() WHERE UserId = @UserId";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId
+            });
+        }
+
+        public async Task UpdateFullName(int userId, string fullName)
+        {
+            var sql = @"UPDATE [User] SET FullName = @FullName, UpdatedAt = GETDATE() WHERE UserId = @UserId;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId,
+                FullName = fullName
+            });
+        }
+
+        public async Task UpdateProfession(int userId, string? profession)
+        {
+            var sql = @"UPDATE [User] SET Profession = @Profession, UpdatedAt = GETDATE() WHERE UserId = @UserId;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId,
+                Profession = profession
+            });
+        }
     }
 }
