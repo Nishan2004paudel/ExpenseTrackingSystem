@@ -7,5 +7,6 @@ namespace expensetrackerserver.Services
         string GenerateRefreshToken();
         string GenerateEmailVerificationToken();
         string GenerateSecureToken();
+        string GeneratePasswordResetToken();
     }
 }

@@ -8,9 +8,11 @@ import {
   LoginResponse,
   UserDetail,
   ResendVerificationRequest,
-  ResendByEmailRequest
+  ResendByEmailRequest,
+  GoogleLoginRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest
 } from '../models/auth.model';
-
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   // Access token lives ONLY in memory — cleared on refresh/tab close
@@ -37,6 +39,18 @@ export class AuthService {
       )
       .pipe(tap(res => this.setSession(res)));
   }
+  googleLogin(payload: GoogleLoginRequest) {
+    return this.http
+      .post<LoginResponse>(
+        `${environment.apiUrl}/auth/google-login`,
+        payload,
+        { withCredentials: true }
+      )
+      .pipe(tap(res => this.setSession(res)));
+  }
+
+
+ 
 
   private setSession(res: LoginResponse) {
     this.accessToken = res.accessToken;
@@ -53,6 +67,12 @@ export class AuthService {
       .post(`${environment.apiUrl}/auth/logout`, {}, { withCredentials: true })
       .pipe(tap(() => this.clearSession()));
   }
+
+  logoutEverywhere() {
+    return this.http
+      .post(`${environment.apiUrl}/auth/logout/everywhere`, {}, { withCredentials: true })
+      .pipe(tap(() => this.clearSession()));
+  }
   refresh() {
     return this.http
       .post<{ accessToken: string; refreshToken: string }>(
@@ -67,11 +87,7 @@ export class AuthService {
         })
       );
   }
-  getMe() {
-    return this.http
-      .get<UserDetail>(`${environment.apiUrl}/auth/me`)
-      .pipe(tap(user => this.currentUser.set(user)));
-  }
+
   clearSession() {
     this.accessToken = null;
     this.currentUser.set(null);
@@ -88,6 +104,14 @@ export class AuthService {
       `${environment.apiUrl}/auth/resend-verification-by-email`,
       payload
     );
+  }
+
+  forgotPassword(payload: ForgotPasswordRequest) {
+    return this.http.post(`${environment.apiUrl}/auth/forgot-password`, payload);
+  }
+
+  resetPassword(payload: ResetPasswordRequest) {
+    return this.http.post(`${environment.apiUrl}/auth/reset-password`, payload);
   }
   verifyEmail(token: string) {
     return this.http.get(

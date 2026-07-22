@@ -59,5 +59,48 @@ namespace expensetrackerserver.Services
                     subject,
                     htmlBody);
         }
+
+        public async Task SendPasswordResetEmailAsync(string toEmail, string fullName, string resetToken)
+        {
+            var resetLink = $"http://localhost:4200/reset-password?token={Uri.EscapeDataString(resetToken)}";
+            var subject = "Reset your Expense Tracker password";
+            var body = $@"
+                <html>
+                    <body style='font-family:Arial,sans-serif;'>
+                    <h2>Hello {fullName}, </h2>
+                    <p>We received a request to reset the password for your Expense Tracker account.</p>
+
+                    <p>
+                    Click the button below to create a new password.
+                    </p>
+                    <p style = 'margin:30px 0'>
+                    <a href='{resetLink}'
+                      style ='background:#2563eb;
+                    color:white;
+                    padding:12px 20px;
+                    text-decoration:none;
+                    border-radius:6px;'>
+                    
+                    Reset Password
+                    </a>
+                    </p>
+
+                    <p>
+                       If the button doesn't work, copy and paste this link:
+                    </p>
+                    <p>{resetLink}</p>
+                    <p>
+                        If you didn't request this password reset, you can safely ignore this email.
+                    </p>
+                    
+                    <p>
+                        This link expires in <b>1 hour</b>.
+                    </p>
+
+                    </body>
+                 </html>";
+
+            await SendEmailAsync(toEmail, subject, body);
+        }
     }
 }

@@ -6,6 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { ApiError } from '../../../core/models/auth.model';
+import { GoogleButtonComponent } from '../google-button/google-button.component';
 
 
 function strongPasswordValidator(control: AbstractControl): ValidationErrors | null {
@@ -19,7 +20,7 @@ function strongPasswordValidator(control: AbstractControl): ValidationErrors | n
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, GoogleButtonComponent],
   templateUrl: './register.component.html'
 })
 export class RegisterComponent {
