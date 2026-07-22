@@ -9,7 +9,15 @@
       <h1 class="text-2xl font-bold text-on-background mb-1">Create an Account</h1>
       <p class="text-on-surface-variant text-sm">Join HisabKitab today to track your expenses effortlessly.</p>
     </div>
+    <div class="mb-6">
+      <app-google-button label="Sign up with Google"></app-google-button>
+    </div>
 
+    <div class="flex items-center gap-2 mb-6">
+      <div class="h-px flex-1 bg-outline-variant"></div>
+      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant">Or continue with email</span>
+      <div class="h-px flex-1 bg-outline-variant"></div>
+    </div>
     <p *ngIf="errorMessage()" class="text-error text-sm mb-4 text-center">{{ errorMessage() }}</p>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
@@ -94,14 +102,10 @@
           <label class="block text-sm font-semibold text-on-surface-variant" for="profession">
             Profession <span class="text-xs text-on-surface-variant font-normal">(Optional)</span>
           </label>
-          <select id="profession" formControlName="profession"
-            class="w-full px-4 py-2 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none">
-            <option value="">Select profession...</option>
-            <option *ngFor="let p of professions" [value]="p">{{ p }}</option>
-          </select>
+          <input id="profession" formControlName="profession" type="text" placeholder="e.g. Software Engineer"
+            class="w-full px-4 py-2 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none" />
         </div>
       </div>
-
       <div class="flex items-start gap-2">
         <input id="agreeToTerms" formControlName="agreeToTerms" type="checkbox" class="mt-1 accent-primary" />
         <label for="agreeToTerms" class="text-sm text-on-surface-variant">

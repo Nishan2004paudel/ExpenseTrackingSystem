@@ -26,5 +26,10 @@ namespace expensetrackerserver.Repositories
         Task UpdatePassword(int userId, string password);
         Task UpdateUsername(int userId, string username);
         Task UpdatePreferredCalendar(int userId, string PreferredCalendar);
+        Task UpdatePasswordResetToken(int userId, string token, DateTime expiresAt);
+        Task<User?> GetByPasswordResetToken(string token);
+        Task ClearPasswordResetToken(int userId);
+        Task UpdateFullName(int userId, string fullName);
+        Task UpdateProfession(int userId, string? Profession);
     }
 }

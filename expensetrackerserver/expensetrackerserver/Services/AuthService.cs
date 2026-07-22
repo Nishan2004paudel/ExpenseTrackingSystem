@@ -152,28 +152,7 @@ namespace expensetrackerserver.Services
                 RefreshToken = refreshToken
             };
         }
-        public async Task<UserDetailDto> GetUserDetail(int userId)
-        {
-            var user = await _repo.GetById(userId);
 
-            if (user == null)
-            {
-                throw new UserNotFoundException();
-            }
-
-            return new UserDetailDto
-            {
-                UserId = user.UserId,
-                Username = user.Username,
-                Email = user.Email,
-                FullName = user.FullName,
-                Profession = user.Profession,
-                PreferredCalendar = user.PreferredCalendar,
-                Role = user.Role,
-                AuthProvider = user.AuthProvider,
-                HasPassword = !string.IsNullOrEmpty(user.Password)
-            };
-        }
 
         public async Task<RefreshTokenResponseDto> Refresh(string refreshToken)
         {
@@ -320,7 +299,7 @@ namespace expensetrackerserver.Services
                 await _repo.VerifyEmail(user.UserId);
                 user.IsEmailVerified = true;
             }
-        
+
 
             if (user == null)
             {
@@ -375,67 +354,74 @@ namespace expensetrackerserver.Services
             };
         }
 
-        public async Task<MessageResponseDto> SetupPassword(int userId, SetupPasswordDto dto)
+
+        public async Task<MessageResponseDto> ForgotPassword(ForgotPasswordDto dto)
         {
-            var user = await _repo.GetById(userId);
+            var user = await _repo.GetByEmailOrUsername(dto.Identifier);
+
             if (user == null)
             {
-                throw new UserNotFoundException();
-            }
-            if (!string.IsNullOrEmpty(user.Password))
-            {
-                throw new PasswordAlreadySetException();
+                return new MessageResponseDto
+                {
+                    Message = "If an account exists with this identifier, a password reset link has been sent."
+                };
             }
 
+            if (string.IsNullOrEmpty(user.Password))
+            {
+                return new MessageResponseDto
+                {
+                    Message = "If an account exists with this identifier, a password reset link has been sent."
+                };
+            }
+
+
+            var resetToken = _jwtService.GeneratePasswordResetToken();
+            var expiresAt = DateTime.UtcNow.AddHours(1);
+
+            await _repo.UpdatePasswordResetToken(user.UserId, resetToken, expiresAt);
+            await _emailService.SendPasswordResetEmailAsync(user.Email, user.FullName, resetToken);
+
+            return new MessageResponseDto
+            {
+                Message = "If an account exists with this identifier, a password reset link has been sent."
+            };
+        }
+
+        public async Task<MessageResponseDto> ResetPassword(ResetPasswordDto dto)
+        {
+            var user = await _repo.GetByPasswordResetToken(dto.Token);
+            if (user == null)
+            {
+                throw new InvalidPasswordResetException("Invalid password reset link.");
+            }
+
+            if (user.PasswordResetExpiresAt == null || user.PasswordResetExpiresAt < DateTime.UtcNow)
+            {
+                throw new PasswordResetExpiredException("Password reset link has expired.Please request a new password reset email.");
+            }
             ValidatePassword(dto.Password);
+
+            if (!string.IsNullOrEmpty(user.Password) &&
+    BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
+            {
+                throw new InvalidPasswordException(
+                    "New password cannot be the same as your current password.");
+            }
+
+
+
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
             await _repo.UpdatePassword(user.UserId, hashedPassword);
-            return new MessageResponseDto
-            {
-                Message = "Password has been set successfully."
-            };
-        }
 
-        public async Task<MessageResponseDto> SetupUsername(int userId, SetupUsernameDto dto)
-        {
-            var user = await _repo.GetById(userId);
-            if (user == null)
-            {
-                throw new UserNotFoundException();
-            }
-            if (!string.IsNullOrEmpty(user.Username))
-            {
-                throw new UsernameAlreadySetException();
-            }
-            dto.Username = dto.Username.Trim();
-            if (await _repo.UsernameExists(dto.Username))
-            {
-                throw new UsernameAlreadyExistsException();
-            }
-
-            await _repo.UpdateUsername(user.UserId, dto.Username);
-            return new MessageResponseDto
-            {
-                Message = "Username set successfully."
-            };
-        }
-
-        public async Task<MessageResponseDto> ChangePreferredCalendar(int userId, UpdatePreferredCalendarDto dto)
-        {
-            var user = await _repo.GetById(userId);
-
-            if (user == null)
-            {
-                throw new UserNotFoundException();
-            }
-            dto.PreferredCalendar = dto.PreferredCalendar.Trim();
-            ValidatePreferredCalendar(dto.PreferredCalendar);
-
-            await _repo.UpdatePreferredCalendar(user.UserId, dto.PreferredCalendar);
+            await _repo.ClearPasswordResetToken(user.UserId);
+            await _repo.IncrementTokenVersion(user.UserId);
+            await _refreshRepo.RevokeAllByUserId(user.UserId);
 
             return new MessageResponseDto
             {
-                Message = "Preferred calendar updated successfully"
+                Message = "Password reset successfully. Please log in again."
             };
         }
     }
