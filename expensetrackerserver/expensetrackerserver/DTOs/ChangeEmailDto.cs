@@ -1,7 +1,12 @@
-﻿namespace expensetrackerserver.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace expensetrackerserver.DTOs
 {
     public class ChangeEmailDto
     {
-        public string CurrentPassword
+        [Required]
+        public string CurrentPassword { get; set; } = string.Empty;
+        [EmailAddress]
+        public string NewEmail { get; set; } = string.Empty;
     }
 }
