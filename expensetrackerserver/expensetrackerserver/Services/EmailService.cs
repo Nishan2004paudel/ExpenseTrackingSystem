@@ -102,5 +102,57 @@ namespace expensetrackerserver.Services
 
             await SendEmailAsync(toEmail, subject, body);
         }
+
+        public async Task SendChangeEmailVerificationAsync(
+            string newEmail,
+            string fullName,
+            string token)
+        {
+            var verifyUrl =
+                $"http://localhost:4200/verify-email-change?token={Uri.EscapeDataString(token)}";
+
+            var subject = "Confirm your new email address";
+
+            var body = $@"
+                            <html>
+                            <body style='font-family:Arial,sans-serif;'>
+
+                            <h2>Hello {fullName},</h2>
+
+                            <p>You requested to change the email address associated with your Expense Tracker account.</p>
+
+                            <p>Please confirm this change by clicking the button below.</p>
+
+                            <p style='margin:30px 0'>
+                            <a href='{verifyUrl}'
+                            style='background:#2563eb;
+                            color:white;
+                            padding:12px 20px;
+                            text-decoration:none;
+                            border-radius:6px;
+                            display:inline-block;'>
+
+                            Confirm Email Change
+
+                            </a>
+                            </p>
+
+                            <p>If the button doesn't work, copy and paste this link:</p>
+
+                            <p>{verifyUrl}</p>
+
+                            <p>This link expires in <b>24 hours</b>.</p>
+
+                            <p>If you didn't request this change, you can safely ignore this email. Your current email address will remain unchanged.</p>
+
+                            <br/>
+
+                            <p>Expense Tracker</p>
+
+                            </body>
+                            </html>";
+
+            await SendEmailAsync(newEmail, subject, body);
+        }
     }
 }

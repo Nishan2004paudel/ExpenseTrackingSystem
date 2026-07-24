@@ -31,5 +31,8 @@ namespace expensetrackerserver.Repositories
         Task ClearPasswordResetToken(int userId);
         Task UpdateFullName(int userId, string fullName);
         Task UpdateProfession(int userId, string? Profession);
+        Task UpdatePendingEmail(int userId, string pendingEmail, string token, DateTime expiresAt);
+        Task<User?> GetByPendingEmailVerificationToken(string token);
+        Task ConfirmPendingEmail(int userId);
     }
 }
