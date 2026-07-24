@@ -10,5 +10,7 @@
         Task SendVerificationEmailAsync(string toEmail, string fullName, string verificationToken);
 
         Task SendPasswordResetEmailAsync(string email, string fullName, string resettoken);
+
+        Task SendChangeEmailVerificationAsync(string newEmail, string fullName, string token);
     }
 }

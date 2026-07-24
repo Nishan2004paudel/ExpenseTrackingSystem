@@ -236,5 +236,39 @@ namespace expensetrackerserver.Repositories
                 Profession = profession
             });
         }
+
+        public async Task UpdatePendingEmail(int userId, string pendingEmail, string token, DateTime expiresAt)
+        {
+            var sql = @"UPDATE [User] SET PendingEmail = @PendingEmail, PendingEmailVerificationToken = @Token,PendingEmailVerificationExpiresAt= @ExpiresAt, UpdatedAt = GETDATE() WHERE UserId = @UserId;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId,
+                PendingEmail = pendingEmail,
+                Token = token,
+                ExpiresAt = expiresAt
+            });
+        }
+
+        public async Task<User?> GetByPendingEmailVerificationToken(string token)
+        {
+            var sql = @"SELECT * FROM [User] WHERE PendingEmailVerificationToken = @Token;";
+            using var connection = _context.CreateConnection();
+            return await connection.QueryFirstOrDefaultAsync<User>(sql,
+                new
+                {
+                    Token = token
+                });
+        }
+
+        public async Task ConfirmPendingEmail(int userId)
+        {
+            var sql = @"UPDATE [User] SET Email = PendingEmail, PendingEmail = NULL, PendingEmailVerificationToken = NULL, PendingEmailVerificationExpiresAt = NULL, UpdatedAt = GETDATE() WHERE UserId = @UserId;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId
+            });
+        }
     }
 }
