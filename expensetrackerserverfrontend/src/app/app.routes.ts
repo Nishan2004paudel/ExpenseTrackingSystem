@@ -39,6 +39,11 @@ export const routes: Routes = [
       import('./features/auth/verify-email/verify-email.component').then(m => m.VerifyEmailComponent)
   },
   {
+    path: 'verify-email-change',
+    loadComponent: () =>
+      import('./features/settings/verify-email-change/verify-email-change.component').then(m => m.VerifyEmailChangeComponent)
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -54,10 +59,10 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/profile/profile.component').then(m => m.ProfileComponent) // placeholder until dashboard exists
       },
-      {
+{
         path: 'settings',
         loadComponent: () =>
-          import('./features/profile/profile.component').then(m => m.ProfileComponent) // placeholder until settings exists
+          import('./features/settings/settings.component').then(m => m.SettingsComponent)
       }
     ]
   }

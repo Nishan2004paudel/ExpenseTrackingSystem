@@ -74,3 +74,16 @@ export interface UpdateFullNameRequest {
 export interface UpdateProfessionRequest {
   profession?: string;
 }
+export interface ChangeEmailRequest {
+  currentPassword: string;
+  newEmail: string;
+}
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+export interface ChangeUsernameRequest {
+  currentPassword: string;
+  newUsername: string;
+}
