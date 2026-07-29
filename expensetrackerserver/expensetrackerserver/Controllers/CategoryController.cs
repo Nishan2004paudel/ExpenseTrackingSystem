@@ -43,10 +43,14 @@ namespace expensetrackerserver.Controllers
         }
 
         [HttpDelete("{categoryId}")]
-        public async Task<IActionResult> Delete(int categoryId)
+        public async Task<IActionResult> Delete(int categoryId, [FromBody] DeleteCategoryDto dto)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            await _service.SoftDelete(categoryId, userId);
+            var result = await _service.Delete(categoryId, dto, userId);
+            if (result != null)
+            {
+                return Ok(result);
+            }
             return NoContent();
         }
     }

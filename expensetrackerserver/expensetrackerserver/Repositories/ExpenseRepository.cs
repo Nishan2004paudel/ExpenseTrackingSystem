@@ -89,5 +89,25 @@ namespace expensetrackerserver.Repositories
                     CategoryId = categoryId
                 });
         }
+        public async Task TransferCategory(int sourceCategoryId, int targetCategoryId)
+        {
+            var sql = @"UPDATE Expense SET CategoryId = @TargetCategoryId, UpdatedAt = GETDATE() WHERE CategoryId = @SourceCategoryId AND IsDeleted=0;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                SourceCategoryId = sourceCategoryId,
+                TargetCategoryId = targetCategoryId
+            });
+        }
+
+        public async Task SoftDeleteByCategory(int categoryId)
+        {
+            var sql = @"UPDATE Expense SET IsDeleted =1, UpdatedAt = GETDATE() WHERE CategoryId = @CategoryId AND IsDeleted =0;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                CategoryId = categoryId
+            });
+        }
     }
 }

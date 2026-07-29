@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using expensetrackerserver.Data;
 using expensetrackerserver.Models;
+using expensetrackerserver.DTOs;
 
 namespace expensetrackerserver.Repositories
 {
@@ -69,6 +70,132 @@ namespace expensetrackerserver.Repositories
             await connection.ExecuteAsync(
                 sql,
                 new { BudgetId = budgetId });
+        }
+
+        public async Task TransferCategory(int sourceCategoryId, int targetCategoryId)
+        {
+            var sql = @"UPDATE source SET source.CategoryId = @TargetCategoryId, source.UpdatedAt = GETDATE() FROM BudgetLimit source 
+                            WHERE source.CategoryId = @SourceCategoryId AND source.IsDeleted = 0
+                            AND NOT EXISTS 
+                            (
+                        SELECT 1 
+                        FROM BudgetLimit target
+                        WHERE 
+                            target.CategoryId = @TargetCategoryId
+                            AND target.IsDeleted = 0
+                            AND YEAR(target.BudgetMonth) = YEAR(source.BudgetMonth)
+                            AND MONTH(target.BudgetMonth) = MONTH(source.BudgetMonth))
+                        ;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                SourceCategoryId = sourceCategoryId,
+                TargetCategoryId = targetCategoryId
+            });
+        }
+
+        public async Task SoftDeleteByCategory(int categoryId)
+        {
+            var sql = @"UPDATE BudgetLimit SET IsDeleted = 1,UpdatedAt = GETDATE() WHERE CategoryId = @CategoryId AND IsDeleted = 0;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                CategoryId = categoryId
+            });
+        }
+
+        public async Task<IEnumerable<BudgetConflictDto>> GetConflictingBudgets(int sourceCategoryId, int targetCategoryId)
+        {
+            var sql = @"SELECT
+                            s.BudgetMonth,
+
+                            s.CategoryId AS SourceCategoryId,
+                            sc.CategoryName AS SourceCategoryName,
+
+                            t.CategoryId AS TargetCategoryId,
+                            tc.CategoryName AS TargetCategoryName,
+
+                            s.BudgetAmount AS SourceBudgetAmount,
+                            t.BudgetAmount AS TargetBudgetAmount
+
+                        FROM BudgetLimit s
+                        INNER JOIN BudgetLimit t
+                            ON YEAR(s.BudgetMonth) = YEAR(t.BudgetMonth)
+                            AND MONTH(s.BudgetMonth) = MONTH(t.BudgetMonth)
+
+                        INNER JOIN Category sc
+                            ON sc.CategoryId = s.CategoryId
+
+                        INNER JOIN Category tc
+                            ON tc.CategoryId = t.CategoryId
+
+                        WHERE
+                            s.CategoryId = @SourceCategoryId
+                            AND t.CategoryId = @TargetCategoryId
+                            AND s.IsDeleted = 0
+                            AND t.IsDeleted = 0;";
+            using var connection = _context.CreateConnection();
+            return await connection.QueryAsync<BudgetConflictDto>(sql, new
+            {
+                SourceCategoryId = sourceCategoryId,
+                TargetCategoryId = targetCategoryId
+            });
+        }
+
+        public async Task MergeConflictingBudgets(int sourceCategoryId, int targetCategoryId)
+        {
+            var sql = @"UPDATE target SET target.BudgetAmount =target.BudgetAmount+ source.BudgetAmount ,
+                                    target.UpdatedAt = GETDATE()
+                                FROM  BudgetLimit target
+                                INNER JOIN BudgetLimit source 
+                        ON YEAR(target.BudgetMonth)=YEAR(source.BudgetMonth)
+                        AND MONTH(target.BudgetMonth)=MONTH(source.BudgetMonth)
+                        WHERE 
+                            target.CategoryId = @TargetCategoryId
+                            AND source.CategoryId = @SourceCategoryId
+                            AND target.IsDeleted = 0
+                            AND source.IsDeleted = 0;
+                        UPDATE BudgetLimit 
+                        SET 
+                            IsDeleted = 1,
+                            UpdatedAt = GETDATE()
+                       WHERE BudgetId IN 
+                        (
+                            SELECT source.BudgetId 
+                            FROM BudgetLimit source
+                            INNER JOIN BudgetLimit target
+                                ON YEAR(target.BudgetMonth)=YEAR(source.BudgetMonth)
+                                AND MONTH(target.BudgetMonth)=MONTH(source.BudgetMonth)
+                        WHERE 
+                            source.CategoryId = @SourceCategoryId
+                            AND target.CategoryId = @TargetCategoryId
+                            AND source.IsDeleted = 0
+                            AND target.IsDeleted = 0);";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                SourceCategoryId = sourceCategoryId,
+                TargetCategoryId = targetCategoryId
+            });
+        }
+        public async Task DeleteConflictingSourceBudgets(int sourceCategoryId, int targetCategoryId)
+        {
+            var sql = @"UPDATE source SET source.IsDeleted = 1, source.UpdatedAt = GETDATE() FROM BudgetLimit source 
+                        INNER JOIN BudgetLimit target 
+                        ON YEAR(target.BudgetMonth)=YEAR(source.BudgetMonth)
+                        AND MONTH(target.BudgetMonth)=MONTH(source.BudgetMonth)
+                        WHERE  source.CategoryId = @SourceCategoryId
+                        AND target.CategoryId = @TargetCategoryId
+                        AND source.IsDeleted = 0
+                        AND target.IsDeleted = 0;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                SourceCategoryId = sourceCategoryId,
+                TargetCategoryId = targetCategoryId
+            });
+
+
         }
     }
 }
