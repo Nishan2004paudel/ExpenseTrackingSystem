@@ -1,48 +1,79 @@
 <div class="h-screen flex bg-background overflow-hidden">
-  <aside class="w-64 shrink-0 h-screen bg-surface-container-lowest border-r border-outline-variant flex flex-col p-4">
-    <div class="flex items-center gap-2 px-2 mb-6">
-      <span class="material-symbols-outlined text-primary text-[24px]">account_balance_wallet</span>
-      <span class="text-lg font-bold text-on-background">HisabKitab</span>
-    </div>
+  <aside [class.w-64]="!sidebarCollapsed()" [class.w-16]="sidebarCollapsed()"
+         class="shrink-0 h-screen bg-surface-container-lowest border-r border-outline-variant flex flex-col p-3 transition-all duration-200">
+
+    <button type="button" (click)="toggleSidebar()"
+            class="flex items-center justify-center p-2 mb-4 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors self-end">
+      <span class="material-symbols-outlined text-[20px]">
+        {{ sidebarCollapsed() ? 'menu' : 'menu_open' }}
+      </span>
+    </button>
 
     <nav class="flex-1 space-y-1 overflow-y-auto">
       <a routerLink="/dashboard" routerLinkActive="bg-primary-container text-on-primary-container font-semibold"
-         class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors">
-        <span class="material-symbols-outlined text-[20px]">dashboard</span>
-        Dashboard
+         [class.justify-center]="sidebarCollapsed()"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="Dashboard">
+        <span class="material-symbols-outlined text-[20px] shrink-0">dashboard</span>
+        <span *ngIf="!sidebarCollapsed()">Dashboard</span>
       </a>
       <a routerLink="/profile" routerLinkActive="bg-primary-container text-on-primary-container font-semibold"
-         class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors">
-        <span class="material-symbols-outlined text-[20px]">person</span>
-        Profile
+         [class.justify-center]="sidebarCollapsed()"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="Profile">
+        <span class="material-symbols-outlined text-[20px] shrink-0">person</span>
+        <span *ngIf="!sidebarCollapsed()">Profile</span>
+      </a>
+      <a routerLink="/categories" routerLinkActive="bg-primary-container text-on-primary-container font-semibold"
+         [class.justify-center]="sidebarCollapsed()"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="Categories">
+        <span class="material-symbols-outlined text-[20px] shrink-0">category</span>
+        <span *ngIf="!sidebarCollapsed()">Categories</span>
+      </a>
+      <a routerLink="/expenses" routerLinkActive="bg-primary-container text-on-primary-container font-semibold"
+         [class.justify-center]="sidebarCollapsed()"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="Expenses">
+        <span class="material-symbols-outlined text-[20px] shrink-0">receipt_long</span>
+        <span *ngIf="!sidebarCollapsed()">Expenses</span>
       </a>
       <a routerLink="/settings" routerLinkActive="bg-primary-container text-on-primary-container font-semibold"
-         class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors">
-        <span class="material-symbols-outlined text-[20px]">settings</span>
-        Settings
+         [class.justify-center]="sidebarCollapsed()"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="Settings">
+        <span class="material-symbols-outlined text-[20px] shrink-0">settings</span>
+        <span *ngIf="!sidebarCollapsed()">Settings</span>
       </a>
     </nav>
 
     <div class="shrink-0 space-y-2 pt-2">
-      <button type="button" class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary py-2.5 rounded-lg font-bold hover:opacity-90 transition-all">
-        <span class="material-symbols-outlined text-[18px]">add</span>
-        Add Expense
-      </button>
+      <a routerLink="/expenses" [class.justify-center]="sidebarCollapsed()"
+         class="w-full flex items-center gap-2 bg-primary text-on-primary py-2.5 rounded-lg font-bold hover:opacity-90 transition-all" title="Add Expense">
+        <span class="material-symbols-outlined text-[18px] shrink-0">add</span>
+        <span *ngIf="!sidebarCollapsed()">Add Expense</span>
+      </a>
 
-      <button type="button" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors text-sm">
-        <span class="material-symbols-outlined text-[18px]">help</span>
-        Help Center
+      <button type="button" [class.justify-center]="sidebarCollapsed()"
+              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors text-sm" title="Help Center">
+        <span class="material-symbols-outlined text-[18px] shrink-0">help</span>
+        <span *ngIf="!sidebarCollapsed()">Help Center</span>
       </button>
     </div>
   </aside>
 
-<main class="flex-1 h-screen flex flex-col overflow-hidden">
-    <div class="shrink-0 flex justify-end items-center px-8 py-3 border-b border-outline-variant bg-surface-container-lowest">
-      <button type="button" (click)="logout()"
-              class="flex items-center gap-2 text-error text-sm font-semibold hover:underline">
-        <span class="material-symbols-outlined text-[18px]">logout</span>
-        Logout
-      </button>
+  <main class="flex-1 h-screen flex flex-col overflow-hidden">
+    <div class="shrink-0 flex justify-between items-center px-8 py-3 border-b border-outline-variant bg-surface-container-lowest">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[22px]">account_balance_wallet</span>
+        <span class="font-bold text-on-background">HisabKitab</span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <span *ngIf="auth.currentUser() as user" class="text-sm text-on-surface-variant">
+          {{ user.fullName }}
+        </span>
+        <button type="button" (click)="logout()"
+                class="flex items-center gap-1.5 text-error text-sm font-semibold hover:bg-error/10 px-3 py-1.5 rounded-lg transition-colors">
+          <span class="material-symbols-outlined text-[18px]">logout</span>
+          Logout
+        </button>
+      </div>
     </div>
     <div class="flex-1 min-h-0 p-6 flex justify-center overflow-hidden">
       <div class="w-full max-w-3xl h-full">

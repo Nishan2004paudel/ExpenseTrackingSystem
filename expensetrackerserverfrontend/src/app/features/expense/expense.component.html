@@ -1,0 +1,157 @@
+<div class="h-full flex flex-col overflow-hidden">
+  <div class="shrink-0 mb-3 flex justify-between items-start">
+    <div>
+     
+      <p class="text-on-surface-variant text-sm mt-0.5">Track and manage your spending.</p>
+    </div>
+    <button type="button" (click)="openCreateForm()"
+            class="flex items-center gap-1.5 bg-primary text-on-primary px-4 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90">
+      <span class="material-symbols-outlined text-[18px]">add</span>
+      Add Expense
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="shrink-0 mb-4 flex flex-wrap gap-2 items-end bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3">
+    <div>
+      <label class="block text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-1">Year</label>
+      <select [ngModel]="filterYear()" (ngModelChange)="filterYear.set($event)"
+              class="px-3 py-1.5 bg-surface border border-outline-variant rounded-lg text-sm outline-none">
+        <option [ngValue]="null">All</option>
+        <option *ngFor="let y of years()" [ngValue]="y">{{ y }}</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-1">Month</label>
+      <select [ngModel]="filterMonth()" (ngModelChange)="filterMonth.set($event)"
+              class="px-3 py-1.5 bg-surface border border-outline-variant rounded-lg text-sm outline-none">
+        <option [ngValue]="null">All</option>
+        <option *ngFor="let m of months" [ngValue]="m.value">{{ m.label }}</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-1">Category</label>
+      <select [ngModel]="filterCategoryId()" (ngModelChange)="filterCategoryId.set($event)"
+              class="px-3 py-1.5 bg-surface border border-outline-variant rounded-lg text-sm outline-none">
+        <option [ngValue]="null">All</option>
+        <option *ngFor="let c of categories()" [ngValue]="c.categoryId">{{ c.categoryName }}</option>
+      </select>
+    </div>
+    <button type="button" (click)="applyFilters()"
+            class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-semibold bg-primary text-on-primary hover:opacity-90">
+      <span class="material-symbols-outlined text-[16px]">filter_alt</span>
+      Apply
+    </button>
+    <button type="button" (click)="clearFilters()"
+            class="px-3 py-1.5 rounded-lg text-sm font-semibold border border-outline-variant hover:bg-surface-container-low">
+      Clear
+    </button>
+  </div>
+
+  <!-- List -->
+  <div class="flex-1 min-h-0 bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-sm flex flex-col overflow-hidden">
+    <div class="shrink-0 flex justify-between items-center px-5 py-4 border-b border-outline-variant">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[20px]">receipt_long</span>
+        <h3 class="text-[15px] font-bold text-on-background">{{ expenses().length }} Expense(s)</h3>
+      </div>
+      <span class="bg-primary-container text-on-primary-container text-sm font-bold px-3 py-1.5 rounded-full">
+        Total: {{ totalAmount() | number:'1.2-2' }}
+      </span>
+    </div>
+
+    <div class="flex-1 min-h-0 overflow-y-auto px-5">
+      <p *ngIf="loading()" class="text-on-surface-variant text-sm py-4">Loading expenses...</p>
+      <p *ngIf="loadError()" class="text-error text-sm py-4">{{ loadError() }}</p>
+      <p *ngIf="deleteError()" class="text-error text-sm mt-3">{{ deleteError() }}</p>
+
+      <div *ngIf="!loading() && expenses().length === 0" class="flex flex-col items-center justify-center py-10 text-center">
+        <span class="material-symbols-outlined text-outline-variant text-[40px] mb-2">receipt_long</span>
+        <p class="text-on-surface-variant text-sm">No expenses found for the selected filters.</p>
+      </div>
+
+      <div *ngFor="let expense of expenses()" class="py-3 border-b border-outline-variant/70 last:border-0 flex justify-between items-center">
+        <div class="flex items-center gap-3 min-w-0">
+          <span class="w-9 h-9 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[18px]">payments</span>
+          </span>
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-on-background truncate">{{ expense.categoryName }}</p>
+            <p class="text-xs text-on-surface-variant">
+              {{ expense.expenseDate | date:'mediumDate' }}
+              <span *ngIf="expense.description"> · {{ expense.description }}</span>
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 shrink-0 pl-3">
+          <span class="text-sm font-bold text-on-background">{{ expense.amount | number:'1.2-2' }}</span>
+          <button type="button" (click)="openEditForm(expense)" class="text-primary text-xs font-bold hover:underline">Edit</button>
+          <button type="button" (click)="deleteExpense(expense.expenseId)" [disabled]="deletingId() === expense.expenseId"
+                  class="text-error text-xs font-bold hover:underline disabled:opacity-50">
+            {{ deletingId() === expense.expenseId ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div *ngIf="showForm()" class="fixed inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-md p-6">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="material-symbols-outlined text-primary text-[20px]">
+        {{ editingExpenseId() ? 'edit' : 'add_circle' }}
+      </span>
+      <h3 class="text-base font-bold text-on-background">
+        {{ editingExpenseId() ? 'Edit Expense' : 'Add Expense' }}
+      </h3>
+    </div>
+
+    <div class="space-y-3">
+      <div>
+        <label class="block text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-1">Category</label>
+        <select [ngModel]="formCategoryId()" (ngModelChange)="formCategoryId.set($event)"
+                class="w-full px-3 py-2.5 bg-surface border border-outline-variant rounded-xl text-sm outline-none">
+          <option [ngValue]="null">Select a category...</option>
+          <option *ngFor="let c of categories()" [ngValue]="c.categoryId">{{ c.categoryName }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-1">Amount</label>
+        <input type="number" min="0.01" step="0.01" placeholder="0.00"
+               [ngModel]="formAmount()" (ngModelChange)="formAmount.set($event)"
+               class="w-full px-3 py-2.5 bg-surface border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none text-sm"/>
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-1">Date</label>
+        <input type="date" [max]="formDate()"
+               [ngModel]="formDate()" (ngModelChange)="formDate.set($event)"
+               class="w-full px-3 py-2.5 bg-surface border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none text-sm"/>
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-1">Description (Optional)</label>
+        <input type="text" placeholder="e.g. Lunch with team"
+               [ngModel]="formDescription()" (ngModelChange)="formDescription.set($event)"
+               class="w-full px-3 py-2.5 bg-surface border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none text-sm"/>
+      </div>
+    </div>
+
+    <p *ngIf="formError()" class="text-error text-xs mt-3">{{ formError() }}</p>
+
+    <div class="flex gap-2 mt-5">
+      <button type="button" (click)="submitForm()"
+              [disabled]="formLoading() || !formCategoryId() || !formAmount() || formAmount()! <= 0 || !formDate()"
+              class="flex-1 bg-primary text-on-primary py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50">
+        {{ formLoading() ? 'Saving...' : (editingExpenseId() ? 'Save Changes' : 'Add Expense') }}
+      </button>
+      <button type="button" (click)="closeForm()"
+              class="px-4 py-2.5 rounded-xl text-sm font-semibold border border-outline-variant hover:bg-surface-container-low">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>

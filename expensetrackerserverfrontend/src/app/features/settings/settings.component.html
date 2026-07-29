@@ -1,245 +1,254 @@
 <div class="h-full flex flex-col overflow-hidden">
-    <div class="shrink-0 mb-3">
-        <h1 class="text-2xl font-bold text-on-background">Settings</h1>
-        <p class="text-on-surface-variant text-sm">Manage sensitive account and security settings.</p>
+  <div class="shrink-0 mb-3">
+    <p class="text-on-surface-variant text-sm">Manage sensitive account and security settings.</p>
+  </div>
+
+  <ng-container *ngIf="auth.currentUser() as user; else loading">
+    <div class="flex-1 min-h-0 w-full bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-sm flex flex-col overflow-hidden">
+      <div class="shrink-0 flex justify-between items-center px-5 py-4 border-b border-outline-variant">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[20px]">shield</span>
+          <h3 class="text-[15px] font-bold text-on-background">Security</h3>
+        </div>
+        <span class="bg-primary-container text-on-primary-container text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-full">
+          Sensitive Actions
+        </span>
+      </div>
+
+      <div class="flex-1 min-h-0 overflow-y-auto px-5 divide-y divide-outline-variant/70">
+
+        <!-- Change Email -->
+        <div class="py-4">
+          <ng-container *ngIf="user.authProvider === 'Google'; else canChangeEmail">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">mail</span>
+              <div>
+                <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Email Address</p>
+                <p class="text-sm text-on-background mt-0.5 mb-1.5">{{ user.email }}</p>
+                <p class="text-xs text-on-surface-variant flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">info</span>
+                  Google accounts cannot change their email address.
+                </p>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-template #canChangeEmail>
+            <ng-container *ngIf="!showEmailForm(); else emailForm">
+              <div class="flex justify-between items-center">
+                <div class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">mail</span>
+                  <div>
+                    <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Email Address</p>
+                    <p class="text-sm font-semibold text-on-background mt-0.5">{{ user.email }}</p>
+                  </div>
+                </div>
+                <button type="button" (click)="startChangeEmail()" class="text-primary text-xs font-bold hover:underline shrink-0">Change</button>
+              </div>
+            </ng-container>
+
+            <ng-template #emailForm>
+              <div class="flex items-center gap-3 mb-2">
+                <span class="material-symbols-outlined text-outline text-[18px]">mail</span>
+                <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Change Email Address</p>
+              </div>
+              <div class="space-y-2 pl-8">
+                <input type="password" placeholder="Current password"
+                       [ngModel]="currentPasswordInput()" (ngModelChange)="currentPasswordInput.set($event)"
+                       class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"/>
+                <input type="email" placeholder="New email address"
+                       [ngModel]="newEmailInput()" (ngModelChange)="newEmailInput.set($event)"
+                       class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"/>
+                <div class="flex gap-2">
+                  <button type="button" (click)="submitChangeEmail()"
+                          [disabled]="emailLoading() || !currentPasswordInput() || !newEmailInput().trim()"
+                          class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
+                    {{ emailLoading() ? 'Sending...' : 'Send Verification Link' }}
+                  </button>
+                  <button type="button" (click)="showEmailForm.set(false)"
+                          class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant hover:bg-surface-container-low">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+              <p *ngIf="emailError()" class="text-error text-xs mt-1.5 pl-8">{{ emailError() }}</p>
+            </ng-template>
+          </ng-template>
+
+          <p *ngIf="emailSuccess()" class="text-primary text-xs mt-1.5 pl-8">{{ emailSuccess() }}</p>
+        </div>
+
+        <!-- Change Password -->
+        <div class="py-4">
+          <ng-container *ngIf="!user.hasPassword">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">lock</span>
+              <div>
+                <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Password</p>
+                <p class="text-sm text-on-background mt-0.5 mb-1.5">Not set</p>
+                <p class="text-xs text-on-surface-variant flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">info</span>
+                  Set up a password on your Profile page first to enable this option.
+                </p>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="user.hasPassword">
+            <ng-container *ngIf="!showPasswordForm(); else passwordForm">
+              <div class="flex justify-between items-center">
+                <div class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">lock</span>
+                  <div>
+                    <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Password</p>
+                    <p class="text-sm font-semibold text-on-background mt-0.5">••••••••</p>
+                  </div>
+                </div>
+                <button type="button" (click)="startChangePassword()" class="text-primary text-xs font-bold hover:underline shrink-0">Change</button>
+              </div>
+              <p *ngIf="passwordChangeSuccess()" class="text-primary text-xs mt-1.5 pl-8 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                Password changed! Redirecting to login...
+              </p>
+            </ng-container>
+          </ng-container>
+
+          <ng-template #passwordForm>
+            <div class="flex items-center gap-3 mb-2">
+              <span class="material-symbols-outlined text-outline text-[18px]">lock</span>
+              <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Change Password</p>
+            </div>
+            <div class="space-y-2 pl-8">
+              <input type="password" placeholder="Current password"
+                     [ngModel]="currentPasswordForPwInput()" (ngModelChange)="currentPasswordForPwInput.set($event)"
+                     class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"/>
+
+              <div class="relative">
+                <input [type]="showNewPasswordText() ? 'text' : 'password'" placeholder="New password"
+                       [ngModel]="newPasswordInput()" (ngModelChange)="newPasswordInput.set($event)"
+                       class="w-full px-3 py-1.5 pr-10 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"/>
+                <button type="button" (click)="toggleNewPasswordText()"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface">
+                  <span class="material-symbols-outlined text-[16px]">{{ showNewPasswordText() ? 'visibility_off' : 'visibility' }}</span>
+                </button>
+              </div>
+
+              <input [type]="showNewPasswordText() ? 'text' : 'password'" placeholder="Confirm new password"
+                     [ngModel]="confirmPasswordInput()" (ngModelChange)="confirmPasswordInput.set($event)"
+                     class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"/>
+
+              <ul class="text-xs flex flex-wrap gap-x-3 gap-y-0.5">
+                <li class="flex items-center gap-1" [class.text-primary]="hasMinLength()" [class.text-on-surface-variant]="!hasMinLength()">
+                  <span class="material-symbols-outlined text-[13px]">{{ hasMinLength() ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  8+ chars
+                </li>
+                <li class="flex items-center gap-1" [class.text-primary]="hasUppercase()" [class.text-on-surface-variant]="!hasUppercase()">
+                  <span class="material-symbols-outlined text-[13px]">{{ hasUppercase() ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  Uppercase
+                </li>
+                <li class="flex items-center gap-1" [class.text-primary]="hasLowercase()" [class.text-on-surface-variant]="!hasLowercase()">
+                  <span class="material-symbols-outlined text-[13px]">{{ hasLowercase() ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  Lowercase
+                </li>
+                <li class="flex items-center gap-1" [class.text-primary]="hasDigit()" [class.text-on-surface-variant]="!hasDigit()">
+                  <span class="material-symbols-outlined text-[13px]">{{ hasDigit() ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  Digit
+                </li>
+                <li class="flex items-center gap-1" [class.text-primary]="passwordsMatch()" [class.text-on-surface-variant]="!passwordsMatch()">
+                  <span class="material-symbols-outlined text-[13px]">{{ passwordsMatch() ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  Passwords match
+                </li>
+              </ul>
+
+              <div class="flex gap-2">
+                <button type="button" (click)="submitChangePassword()"
+                        [disabled]="passwordChangeLoading() || !currentPasswordForPwInput() || !isNewPasswordValid() || !passwordsMatch()"
+                        class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
+                  {{ passwordChangeLoading() ? 'Saving...' : 'Save Password' }}
+                </button>
+                <button type="button" (click)="showPasswordForm.set(false)"
+                        class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant hover:bg-surface-container-low">
+                  Cancel
+                </button>
+              </div>
+            </div>
+            <p *ngIf="passwordChangeError()" class="text-error text-xs mt-1.5 pl-8">{{ passwordChangeError() }}</p>
+          </ng-template>
+        </div>
+
+        <!-- Change Username -->
+        <div class="py-4">
+          <ng-container *ngIf="!user.hasPassword">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">alternate_email</span>
+              <div>
+                <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Username</p>
+                <p class="text-sm text-on-background mt-0.5 mb-1.5">{{ user.username || 'Not set' }}</p>
+                <p class="text-xs text-on-surface-variant flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">info</span>
+                  Set up a password on your Profile page first to enable this option.
+                </p>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="user.hasPassword">
+            <ng-container *ngIf="!showUsernameChangeForm(); else usernameChangeForm">
+              <div class="flex justify-between items-center">
+                <div class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">alternate_email</span>
+                  <div>
+                    <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Username</p>
+                    <p class="text-sm font-semibold text-on-background mt-0.5">{{ user.username }}</p>
+                  </div>
+                </div>
+                <button type="button" (click)="startChangeUsername()" class="text-primary text-xs font-bold hover:underline shrink-0">Change</button>
+              </div>
+              <p *ngIf="usernameChangeSuccess()" class="text-primary text-xs mt-1.5 pl-8 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                Username changed successfully!
+              </p>
+            </ng-container>
+
+            <ng-template #usernameChangeForm>
+              <div class="flex items-center gap-3 mb-2">
+                <span class="material-symbols-outlined text-outline text-[18px]">alternate_email</span>
+                <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Change Username</p>
+              </div>
+              <div class="space-y-2 pl-8">
+                <input type="password" placeholder="Current password"
+                       [ngModel]="currentPasswordForUsernameInput()" (ngModelChange)="currentPasswordForUsernameInput.set($event)"
+                       class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"/>
+                <input type="text" placeholder="New username"
+                       [ngModel]="newUsernameInput()" (ngModelChange)="newUsernameInput.set($event)"
+                       class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"/>
+                <div class="flex gap-2">
+                  <button type="button" (click)="submitChangeUsername()"
+                          [disabled]="usernameChangeLoading() || !currentPasswordForUsernameInput() || !newUsernameInput().trim()"
+                          class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
+                    {{ usernameChangeLoading() ? 'Saving...' : 'Save Username' }}
+                  </button>
+                  <button type="button" (click)="showUsernameChangeForm.set(false)"
+                          class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant hover:bg-surface-container-low">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+              <p *ngIf="usernameChangeError()" class="text-error text-xs mt-1.5 pl-8">{{ usernameChangeError() }}</p>
+            </ng-template>
+          </ng-container>
+        </div>
+
+      </div>
     </div>
 
-    <ng-container *ngIf="auth.currentUser() as user; else loading">
-        <div
-            class="flex-1 min-h-0 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm p-5 flex flex-col overflow-hidden">
-            <div class="shrink-0 flex justify-between items-center mb-2">
-                <h3 class="text-base font-bold text-on-background">Security</h3>
-                <span
-                    class="bg-primary-container text-on-primary-container text-xs font-semibold px-3 py-1 rounded-full">
-                    Sensitive Actions
-                </span>
-            </div>
+    <button type="button" (click)="logoutEverywhere()"
+            class="shrink-0 w-full mt-4 bg-error/10 text-error border border-error/30 py-2.5 rounded-xl font-semibold text-sm hover:bg-error hover:text-on-error transition-all">
+      Logout Everywhere
+    </button>
+  </ng-container>
 
-            <div class="flex-1 min-h-0 overflow-y-auto divide-y divide-outline-variant">
-
-                <!-- Change Email -->
-                <div class="py-2.5">
-                    <ng-container *ngIf="user.authProvider === 'Google'; else canChangeEmail">
-                        <p class="text-xs text-on-surface-variant">Email Address</p>
-                        <p class="text-sm text-on-background mb-1">{{ user.email }}</p>
-                        <p class="text-xs text-on-surface-variant flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">info</span>
-                            Google accounts cannot change their email address.
-                        </p>
-                    </ng-container>
-
-                    <ng-template #canChangeEmail>
-                        <ng-container *ngIf="!showEmailForm(); else emailForm">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="text-xs text-on-surface-variant">Email Address</p>
-                                    <p class="text-sm font-bold text-on-background">{{ user.email }}</p>
-                                </div>
-                                <button type="button" (click)="startChangeEmail()"
-                                    class="text-primary text-xs font-semibold hover:underline">Change</button>
-                            </div>
-                        </ng-container>
-
-                        <ng-template #emailForm>
-                            <p class="text-xs text-on-surface-variant mb-1.5">Change Email Address</p>
-                            <div class="space-y-2">
-                                <input type="password" placeholder="Current password" [ngModel]="currentPasswordInput()"
-                                    (ngModelChange)="currentPasswordInput.set($event)"
-                                    class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm" />
-                                <input type="email" placeholder="New email address" [ngModel]="newEmailInput()"
-                                    (ngModelChange)="newEmailInput.set($event)"
-                                    class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm" />
-                                <div class="flex gap-2">
-                                    <button type="button" (click)="submitChangeEmail()"
-                                        [disabled]="emailLoading() || !currentPasswordInput() || !newEmailInput().trim()"
-                                        class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
-                                        {{ emailLoading() ? 'Sending...' : 'Send Verification Link' }}
-                                    </button>
-                                    <button type="button" (click)="showEmailForm.set(false)"
-                                        class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant hover:bg-surface-container-low">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                            <p *ngIf="emailError()" class="text-error text-xs mt-1.5">{{ emailError() }}</p>
-                        </ng-template>
-                    </ng-template>
-
-                    <p *ngIf="emailSuccess()" class="text-primary text-xs mt-1.5">{{ emailSuccess() }}</p>
-                </div>
-
-
-                <!-- Change Password -->
-                <div class="py-2.5">
-                    <ng-container *ngIf="!user.hasPassword">
-                        <p class="text-xs text-on-surface-variant">Password</p>
-                        <p class="text-sm text-on-background mb-1">Not set</p>
-                        <p class="text-xs text-on-surface-variant flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">info</span>
-                            Set up a password on your Profile page first to enable this option.
-                        </p>
-                    </ng-container>
-
-                    <ng-container *ngIf="user.hasPassword">
-                        <ng-container *ngIf="!showPasswordForm(); else passwordForm">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="text-xs text-on-surface-variant">Password</p>
-                                    <p class="text-sm font-bold text-on-background">••••••••</p>
-                                </div>
-                                <button type="button" (click)="startChangePassword()"
-                                    class="text-primary text-xs font-semibold hover:underline">Change</button>
-                            </div>
-                            <p *ngIf="passwordChangeSuccess()"
-                                class="text-primary text-xs mt-1.5 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">check_circle</span>
-                                Password changed! Redirecting to login...
-                            </p>
-                        </ng-container>
-                    </ng-container>
-
-                    <ng-template #passwordForm>
-                        <p class="text-xs text-on-surface-variant mb-1.5">Change Password</p>
-                        <div class="space-y-2">
-                            <input type="password" placeholder="Current password"
-                                [ngModel]="currentPasswordForPwInput()"
-                                (ngModelChange)="currentPasswordForPwInput.set($event)"
-                                class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm" />
-
-                            <div class="relative">
-                                <input [type]="showNewPasswordText() ? 'text' : 'password'" placeholder="New password"
-                                    [ngModel]="newPasswordInput()" (ngModelChange)="newPasswordInput.set($event)"
-                                    class="w-full px-3 py-1.5 pr-10 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm" />
-                                <button type="button" (click)="toggleNewPasswordText()"
-                                    class="absolute right-2 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface">
-                                    <span class="material-symbols-outlined text-[16px]">{{ showNewPasswordText() ?
-                                        'visibility_off' : 'visibility' }}</span>
-                                </button>
-                            </div>
-
-                            <input [type]="showNewPasswordText() ? 'text' : 'password'"
-                                placeholder="Confirm new password" [ngModel]="confirmPasswordInput()"
-                                (ngModelChange)="confirmPasswordInput.set($event)"
-                                class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm" />
-
-                            <ul class="text-xs flex flex-wrap gap-x-3 gap-y-0.5">
-                                <li class="flex items-center gap-1" [class.text-primary]="hasMinLength()"
-                                    [class.text-on-surface-variant]="!hasMinLength()">
-                                    <span class="material-symbols-outlined text-[13px]">{{ hasMinLength() ?
-                                        'check_circle' : 'radio_button_unchecked' }}</span>
-                                    8+ chars
-                                </li>
-                                <li class="flex items-center gap-1" [class.text-primary]="hasUppercase()"
-                                    [class.text-on-surface-variant]="!hasUppercase()">
-                                    <span class="material-symbols-outlined text-[13px]">{{ hasUppercase() ?
-                                        'check_circle' : 'radio_button_unchecked' }}</span>
-                                    Uppercase
-                                </li>
-                                <li class="flex items-center gap-1" [class.text-primary]="hasLowercase()"
-                                    [class.text-on-surface-variant]="!hasLowercase()">
-                                    <span class="material-symbols-outlined text-[13px]">{{ hasLowercase() ?
-                                        'check_circle' : 'radio_button_unchecked' }}</span>
-                                    Lowercase
-                                </li>
-                                <li class="flex items-center gap-1" [class.text-primary]="hasDigit()"
-                                    [class.text-on-surface-variant]="!hasDigit()">
-                                    <span class="material-symbols-outlined text-[13px]">{{ hasDigit() ? 'check_circle' :
-                                        'radio_button_unchecked' }}</span>
-                                    Digit
-                                </li>
-                                <li class="flex items-center gap-1" [class.text-primary]="passwordsMatch()"
-                                    [class.text-on-surface-variant]="!passwordsMatch()">
-                                    <span class="material-symbols-outlined text-[13px]">{{ passwordsMatch() ?
-                                        'check_circle' : 'radio_button_unchecked' }}</span>
-                                    Passwords match
-                                </li>
-                            </ul>
-
-                            <div class="flex gap-2">
-                                <button type="button" (click)="submitChangePassword()"
-                                    [disabled]="passwordChangeLoading() || !currentPasswordForPwInput() || !isNewPasswordValid() || !passwordsMatch()"
-                                    class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
-                                    {{ passwordChangeLoading() ? 'Saving...' : 'Save Password' }}
-                                </button>
-                                <button type="button" (click)="showPasswordForm.set(false)"
-                                    class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant hover:bg-surface-container-low">
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                        <p *ngIf="passwordChangeError()" class="text-error text-xs mt-1.5">{{ passwordChangeError() }}
-                        </p>
-                    </ng-template>
-                </div>
-
-                <!-- Change Username -->
-                <div class="py-2.5">
-                    <ng-container *ngIf="!user.hasPassword">
-                        <p class="text-xs text-on-surface-variant">Username</p>
-                        <p class="text-sm text-on-background mb-1">{{ user.username || 'Not set' }}</p>
-                        <p class="text-xs text-on-surface-variant flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">info</span>
-                            Set up a password on your Profile page first to enable this option.
-                        </p>
-                    </ng-container>
-
-                    <ng-container *ngIf="user.hasPassword">
-                        <ng-container *ngIf="!showUsernameChangeForm(); else usernameChangeForm">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="text-xs text-on-surface-variant">Username</p>
-                                    <p class="text-sm font-bold text-on-background">{{ user.username }}</p>
-                                </div>
-                                <button type="button" (click)="startChangeUsername()"
-                                    class="text-primary text-xs font-semibold hover:underline">Change</button>
-                            </div>
-                            <p *ngIf="usernameChangeSuccess()"
-                                class="text-primary text-xs mt-1.5 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">check_circle</span>
-                                Username changed successfully!
-                            </p>
-                        </ng-container>
-
-                        <ng-template #usernameChangeForm>
-                            <p class="text-xs text-on-surface-variant mb-1.5">Change Username</p>
-                            <div class="space-y-2">
-                                <input type="password" placeholder="Current password"
-                                    [ngModel]="currentPasswordForUsernameInput()"
-                                    (ngModelChange)="currentPasswordForUsernameInput.set($event)"
-                                    class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm" />
-                                <input type="text" placeholder="New username" [ngModel]="newUsernameInput()"
-                                    (ngModelChange)="newUsernameInput.set($event)"
-                                    class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm" />
-                                <div class="flex gap-2">
-                                    <button type="button" (click)="submitChangeUsername()"
-                                        [disabled]="usernameChangeLoading() || !currentPasswordForUsernameInput() || !newUsernameInput().trim()"
-                                        class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
-                                        {{ usernameChangeLoading() ? 'Saving...' : 'Save Username' }}
-                                    </button>
-                                    <button type="button" (click)="showUsernameChangeForm.set(false)"
-                                        class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant hover:bg-surface-container-low">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                            <p *ngIf="usernameChangeError()" class="text-error text-xs mt-1.5">{{ usernameChangeError()
-                                }}</p>
-                        </ng-template>
-                    </ng-container>
-                </div>
-
-            </div>
-        </div>
-        <button type="button" (click)="logoutEverywhere()"
-            class="shrink-0 w-full mt-3 bg-error text-on-error py-2 rounded-lg font-bold text-sm hover:opacity-90 transition-all">
-            Logout Everywhere
-        </button>
-    </ng-container>
-
-
-
-
-    <ng-template #loading>
-        <p class="text-on-surface-variant text-sm">Loading...</p>
-    </ng-template>
+  <ng-template #loading>
+    <p class="text-on-surface-variant text-sm">Loading...</p>
+  </ng-template>
 </div>

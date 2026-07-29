@@ -1,0 +1,219 @@
+<div class="h-full flex flex-col overflow-hidden">
+  <div class="shrink-0 mb-3">
+
+    <p class="text-on-surface-variant text-sm mt-0.5">Organize your expenses into categories.</p>
+  </div>
+
+  <!-- Create form -->
+  <div class="shrink-0 mb-4 flex gap-2">
+    <div class="relative flex-1">
+      <span class="material-symbols-outlined text-outline text-[18px] absolute left-3 top-1/2 -translate-y-1/2">category</span>
+      <input type="text" placeholder="New category name"
+             [ngModel]="newCategoryName()" (ngModelChange)="newCategoryName.set($event)"
+             class="w-full pl-10 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none text-sm"/>
+    </div>
+    <button type="button" (click)="createCategory()" [disabled]="createLoading() || !newCategoryName().trim()"
+            class="flex items-center gap-1.5 bg-primary text-on-primary px-4 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50">
+      <span class="material-symbols-outlined text-[18px]">add</span>
+      {{ createLoading() ? 'Adding...' : 'Add' }}
+    </button>
+  </div>
+  <p *ngIf="createError()" class="shrink-0 text-error text-xs -mt-3 mb-3">{{ createError() }}</p>
+
+  <!-- List -->
+  <div class="flex-1 min-h-0 bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-sm flex flex-col overflow-hidden">
+    <div class="shrink-0 flex justify-between items-center px-5 py-4 border-b border-outline-variant">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[20px]">category</span>
+        <h3 class="text-[15px] font-bold text-on-background">Your Categories</h3>
+      </div>
+      <span class="bg-primary-container text-on-primary-container text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-full">
+        {{ categories().length }} Total
+      </span>
+    </div>
+
+    <div class="flex-1 min-h-0 overflow-y-auto px-5">
+
+      <p *ngIf="loading()" class="text-on-surface-variant text-sm py-4">Loading categories...</p>
+      <p *ngIf="loadError()" class="text-error text-sm py-4">{{ loadError() }}</p>
+      <div *ngIf="!loading() && categories().length === 0" class="flex flex-col items-center justify-center py-10 text-center">
+        <span class="material-symbols-outlined text-outline-variant text-[40px] mb-2">inbox</span>
+        <p class="text-on-surface-variant text-sm">No categories yet. Add one above to get started.</p>
+      </div>
+
+      <div *ngFor="let category of categories()" class="py-3 border-b border-outline-variant/70 last:border-0">
+        <ng-container *ngIf="editingId() !== category.categoryId; else editRow">
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[16px]">category</span>
+              </span>
+              <p class="text-sm font-medium text-on-background">{{ category.categoryName }}</p>
+            </div>
+            <div class="flex gap-4">
+              <button type="button" (click)="startEdit(category)" class="text-primary text-xs font-bold hover:underline">Edit</button>
+              <button type="button" (click)="openDeleteModal(category)" class="text-error text-xs font-bold hover:underline">Delete</button>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #editRow>
+          <div class="flex gap-2">
+            <input type="text" [ngModel]="editCategoryName()" (ngModelChange)="editCategoryName.set($event)"
+                   class="flex-1 px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"/>
+            <button type="button" (click)="submitEdit(category.categoryId)" [disabled]="editLoading() || !editCategoryName().trim()"
+                    class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
+              {{ editLoading() ? 'Saving...' : 'Save' }}
+            </button>
+            <button type="button" (click)="cancelEdit()"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant hover:bg-surface-container-low">
+              Cancel
+            </button>
+          </div>
+          <p *ngIf="editError()" class="text-error text-xs mt-1">{{ editError() }}</p>
+        </ng-template>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div *ngIf="deleteModalCategory() as delCat" class="fixed inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-md p-6">
+
+    <!-- Step: choose action -->
+    <ng-container *ngIf="deleteStep() === 'choose-action'">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="material-symbols-outlined text-error text-[20px]">warning</span>
+        <h3 class="text-base font-bold text-on-background">Delete "{{ delCat.categoryName }}"</h3>
+      </div>
+      <p class="text-xs text-on-surface-variant mb-4 pl-7">Choose what happens to its expenses and budgets.</p>
+
+      <div class="space-y-2">
+        <button type="button" (click)="chooseAction(CategoryDeleteAction.DeleteAll)"
+                class="w-full text-left px-4 py-3 rounded-xl border border-outline-variant hover:border-error hover:bg-error/5 transition-colors text-sm">
+          <span class="font-semibold text-error flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">delete_forever</span>
+            Delete Everything
+          </span>
+          <p class="text-xs text-on-surface-variant mt-0.5">Permanently remove this category and all its expenses/budgets.</p>
+        </button>
+        <button type="button" (click)="chooseAction(CategoryDeleteAction.TransferToExisting)"
+                class="w-full text-left px-4 py-3 rounded-xl border border-outline-variant hover:border-primary hover:bg-primary-container/30 transition-colors text-sm">
+          <span class="font-semibold text-on-background flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">sync_alt</span>
+            Transfer to Existing Category
+          </span>
+          <p class="text-xs text-on-surface-variant mt-0.5">Move everything into a category you already have.</p>
+        </button>
+        <button type="button" (click)="chooseAction(CategoryDeleteAction.TransferToNew)"
+                class="w-full text-left px-4 py-3 rounded-xl border border-outline-variant hover:border-primary hover:bg-primary-container/30 transition-colors text-sm">
+          <span class="font-semibold text-on-background flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">add_box</span>
+            Create New Category and Transfer
+          </span>
+          <p class="text-xs text-on-surface-variant mt-0.5">Make a new category and move everything into it.</p>
+        </button>
+      </div>
+
+      <p *ngIf="deleteError()" class="text-error text-xs mt-3">{{ deleteError() }}</p>
+
+      <button type="button" (click)="closeDeleteModal()" class="w-full mt-4 px-3 py-2.5 rounded-xl text-sm font-semibold border border-outline-variant hover:bg-surface-container-low">
+        Cancel
+      </button>
+    </ng-container>
+
+    <!-- Step: pick target category -->
+    <ng-container *ngIf="deleteStep() === 'pick-target'">
+      <h3 class="text-base font-bold text-on-background mb-1">Transfer to which category?</h3>
+      <p class="text-xs text-on-surface-variant mb-4">Expenses and budgets from "{{ delCat.categoryName }}" will move here.</p>
+
+      <select [ngModel]="targetCategoryId()" (ngModelChange)="targetCategoryId.set($event)"
+              class="w-full px-3 py-2.5 bg-surface border border-outline-variant rounded-xl text-sm outline-none mb-4">
+        <option [ngValue]="null">Select a category...</option>
+        <option *ngFor="let c of availableTargets()" [ngValue]="c.categoryId">{{ c.categoryName }}</option>
+      </select>
+
+      <p *ngIf="deleteError()" class="text-error text-xs mb-3">{{ deleteError() }}</p>
+
+      <div class="flex gap-2">
+        <button type="button" (click)="confirmDelete()" [disabled]="deleteLoading() || targetCategoryId() === null"
+                class="flex-1 bg-primary text-on-primary py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50">
+          {{ deleteLoading() ? 'Transferring...' : 'Transfer & Delete' }}
+        </button>
+        <button type="button" (click)="closeDeleteModal()"
+                class="px-4 py-2.5 rounded-xl text-sm font-semibold border border-outline-variant hover:bg-surface-container-low">
+          Cancel
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Step: name new category -->
+    <ng-container *ngIf="deleteStep() === 'name-new'">
+      <h3 class="text-base font-bold text-on-background mb-1">Name the new category</h3>
+      <p class="text-xs text-on-surface-variant mb-4">Expenses and budgets from "{{ delCat.categoryName }}" will move here.</p>
+
+      <input type="text" placeholder="New category name"
+             [ngModel]="newCategoryNameForTransfer()" (ngModelChange)="newCategoryNameForTransfer.set($event)"
+             class="w-full px-3 py-2.5 bg-surface border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none text-sm mb-4"/>
+
+      <p *ngIf="deleteError()" class="text-error text-xs mb-3">{{ deleteError() }}</p>
+
+      <div class="flex gap-2">
+        <button type="button" (click)="confirmDelete()" [disabled]="deleteLoading() || !newCategoryNameForTransfer().trim()"
+                class="flex-1 bg-primary text-on-primary py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50">
+          {{ deleteLoading() ? 'Creating & Transferring...' : 'Create & Transfer' }}
+        </button>
+        <button type="button" (click)="closeDeleteModal()"
+                class="px-4 py-2.5 rounded-xl text-sm font-semibold border border-outline-variant hover:bg-surface-container-low">
+          Cancel
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Step: resolve conflicts -->
+    <ng-container *ngIf="deleteStep() === 'resolve-conflicts'">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="material-symbols-outlined text-error text-[20px]">error</span>
+        <h3 class="text-base font-bold text-on-background">Budget Conflicts Found</h3>
+      </div>
+      <p class="text-xs text-on-surface-variant mb-3 pl-7">
+        The target category already has budgets for these months. Choose how to resolve them.
+      </p>
+
+      <div class="max-h-40 overflow-y-auto space-y-2 mb-4">
+        <div *ngFor="let c of conflicts()" class="text-xs border border-outline-variant rounded-xl p-3 bg-surface">
+          <p class="font-semibold text-on-background">{{ c.budgetMonth | date:'MMMM yyyy' }}</p>
+          <p class="text-on-surface-variant mt-0.5">{{ c.sourceCategoryName }}: {{ c.sourceBudgetAmount }} vs {{ c.targetCategoryName }}: {{ c.targetBudgetAmount }}</p>
+        </div>
+      </div>
+
+      <p *ngIf="deleteError()" class="text-error text-xs mb-3">{{ deleteError() }}</p>
+
+      <div class="space-y-2">
+        <button type="button" (click)="resolveConflict(BudgetConflictAction.Merge)" [disabled]="deleteLoading()"
+                class="w-full text-left px-4 py-3 rounded-xl border border-outline-variant hover:border-primary hover:bg-primary-container/30 transition-colors text-sm disabled:opacity-50">
+          <span class="font-semibold text-on-background flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">merge</span>
+            Merge Budgets
+          </span>
+          <p class="text-xs text-on-surface-variant mt-0.5">Sum the conflicting amounts for each month.</p>
+        </button>
+        <button type="button" (click)="resolveConflict(BudgetConflictAction.DeleteSource)" [disabled]="deleteLoading()"
+                class="w-full text-left px-4 py-3 rounded-xl border border-outline-variant hover:border-primary hover:bg-primary-container/30 transition-colors text-sm disabled:opacity-50">
+          <span class="font-semibold text-on-background flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">bookmark</span>
+            Keep Target Budget
+          </span>
+          <p class="text-xs text-on-surface-variant mt-0.5">Discard the source category's conflicting budgets.</p>
+        </button>
+      </div>
+
+      <button type="button" (click)="closeDeleteModal()" class="w-full mt-3 px-3 py-2.5 rounded-xl text-sm font-semibold border border-outline-variant hover:bg-surface-container-low">
+        Cancel
+      </button>
+    </ng-container>
+
+  </div>
+</div>

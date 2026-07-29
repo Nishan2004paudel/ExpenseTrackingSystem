@@ -16,6 +16,16 @@ namespace expensetrackerserver.Services
             _carepo = carepo;
         }
 
+        private void ValidateBudgetMonth(DateTime budgetMonth)
+        {
+            var currentMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var selectedMonth = new DateTime(budgetMonth.Year, budgetMonth.Month, 1);
+            if (selectedMonth < currentMonth)
+            {
+                throw new PastBudgetMonthNotAllowedException("You cannot create or update budgets for past months.");
+            }
+        }
+
         public async Task<BudgetDto> Create(CreateBudgetDto dto, int userId)
         {
             Category? category = null;
@@ -34,8 +44,12 @@ namespace expensetrackerserver.Services
                     throw new CategoryAccessDeniedException("You are not allowed to use this category.");
                 }
             }
-
-            var budgetExists = await _repo.BudgetExists(userId, dto.CategoryId, dto.BudgetMonth);
+            var budgetMonth = new DateTime(
+    dto.BudgetMonth.Year,
+    dto.BudgetMonth.Month,
+    1);
+            ValidateBudgetMonth(budgetMonth);
+            var budgetExists = await _repo.BudgetExists(userId, dto.CategoryId, budgetMonth);
 
             if (budgetExists)
             {
@@ -47,7 +61,7 @@ namespace expensetrackerserver.Services
                 UserId = userId,
                 CategoryId = dto.CategoryId,
                 BudgetAmount = dto.BudgetAmount,
-                BudgetMonth = dto.BudgetMonth
+                BudgetMonth = budgetMonth
             };
 
             var budgetId = await _repo.Create(budget);
@@ -127,8 +141,12 @@ namespace expensetrackerserver.Services
                 }
             }
 
-
-            if (await _repo.BudgetExists(userId, dto.CategoryId, dto.BudgetMonth, budgetId))
+            var budgetMonth = new DateTime(
+dto.BudgetMonth.Year,
+dto.BudgetMonth.Month,
+1);
+            ValidateBudgetMonth(budgetMonth);
+            if (await _repo.BudgetExists(userId, dto.CategoryId, budgetMonth, budgetId))
             {
                 throw new BudgetAlreadyExistsException();
             }
@@ -139,7 +157,7 @@ namespace expensetrackerserver.Services
                 UserId = userId,
                 CategoryId = dto.CategoryId,
                 BudgetAmount = dto.BudgetAmount,
-                BudgetMonth = dto.BudgetMonth
+                BudgetMonth = budgetMonth
             };
 
             await _repo.Update(updatedBudget);
