@@ -18,7 +18,7 @@ namespace expensetrackerserver.Repositories
             int? month,
             int? categoryId)
         {
-            var sql = @"SELECT ISNULL(
+            var sql = @"SELECT 
                             ( 
                             SELECT SUM(BudgetAmount)
                             FROM BudgetLimit WHERE UserId = @UserId AND
@@ -35,7 +35,7 @@ namespace expensetrackerserver.Repositories
                                 OR
                                 (CategoryId = @CategoryId)
                             )
-                        ),0) AS BudgetAmount,
+                        )AS BudgetAmount,
 
                         ISNULL
                         (

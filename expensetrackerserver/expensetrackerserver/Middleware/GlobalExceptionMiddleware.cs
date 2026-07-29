@@ -59,6 +59,7 @@ namespace expensetrackerserver.Middleware
                 InvalidExpenseDateException => StatusCodes.Status400BadRequest,
                 InvalidPasswordResetException => StatusCodes.Status400BadRequest,
                 InvalidFullNameException=>StatusCodes.Status400BadRequest,
+                PastBudgetMonthNotAllowedException=>StatusCodes.Status400BadRequest,
                 PasswordResetExpiredException => StatusCodes.Status403Forbidden,
                 _ => StatusCodes.Status500InternalServerError
             };
