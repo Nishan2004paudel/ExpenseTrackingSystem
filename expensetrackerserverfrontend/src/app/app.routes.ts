@@ -55,11 +55,21 @@ export const routes: Routes = [
           import('./features/profile/profile.component').then(m => m.ProfileComponent)
       },
       {
+        path: 'categories',
+        loadComponent: () =>
+          import('./features/category/category.component').then(m => m.CategoryComponent)
+      },
+            {
+        path: 'expenses',
+        loadComponent: () =>
+          import('./features/expense/expense.component').then(m => m.ExpenseComponent)
+      },
+      {
         path: 'dashboard',
         loadComponent: () =>
           import('./features/profile/profile.component').then(m => m.ProfileComponent) // placeholder until dashboard exists
       },
-{
+      {
         path: 'settings',
         loadComponent: () =>
           import('./features/settings/settings.component').then(m => m.SettingsComponent)

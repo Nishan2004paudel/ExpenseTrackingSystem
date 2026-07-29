@@ -1,104 +1,143 @@
 <div class="h-full flex flex-col overflow-hidden">
-  <div class="shrink-0 mb-3">
-    <h1 class="text-2xl font-bold text-on-background">My Profile</h1>
-    <p class="text-on-surface-variant text-sm">View and manage your personal identity and preferences.</p>
-  </div>
+
 
   <ng-container *ngIf="auth.currentUser() as user; else loading">
-    <div class="shrink-0 mb-3">
-      <h2 class="text-xl font-bold text-on-background">Welcome, {{ user.fullName }}</h2>
-      <p class="flex items-center gap-1 text-on-surface-variant text-xs">
-        <span class="material-symbols-outlined text-[16px]">verified_user</span>
-        Signed up with {{ user.authProvider }}
-      </p>
+    <!-- Identity header -->
+    <div class="shrink-0 mb-3 flex items-center gap-3">
+      <div
+        class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-sm font-bold shrink-0">
+        {{ user.fullName.charAt(0).toUpperCase() }}
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-on-background leading-tight">{{ user.fullName }}</h2>
+        <p class="flex items-center gap-1 text-on-surface-variant text-xs">
+          <span class="material-symbols-outlined text-[13px]">
+            {{ user.authProvider === 'Google' ? 'verified' : 'verified_user' }}
+          </span>
+          Signed up with {{ user.authProvider }}
+        </p>
+      </div>
     </div>
 
-    <div class="flex-1 min-h-0 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm p-5 flex flex-col overflow-hidden">
-      <div class="shrink-0 flex justify-between items-center mb-2">
-        <h3 class="text-base font-bold text-on-background">Personal Information</h3>
-        <span class="bg-primary-container text-on-primary-container text-xs font-semibold px-3 py-1 rounded-full">
+    <div
+      class="flex-1 min-h-0 w-full bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-sm flex flex-col overflow-hidden">
+      <div class="shrink-0 flex justify-between items-center px-5 py-4 border-b border-outline-variant">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[20px]">badge</span>
+          <h3 class="text-[15px] font-bold text-on-background">Personal Information</h3>
+        </div>
+        <span
+          class="bg-primary-container text-on-primary-container text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-full">
           Primary Identity
         </span>
       </div>
 
-      <div class="flex-1 min-h-0 overflow-y-auto divide-y divide-outline-variant">
+      <div class="flex-1 min-h-0 overflow-y-auto px-5 divide-y divide-outline-variant/70">
 
         <!-- Full Name -->
-        <div class="py-2.5">
+        <div class="py-4">
           <ng-container *ngIf="!showFullNameForm(); else fullNameForm">
             <div class="flex justify-between items-center">
-              <div>
-                <p class="text-xs text-on-surface-variant">Full Name</p>
-                <p class="text-sm font-bold text-on-background">{{ user.fullName }}</p>
+              <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">person</span>
+                <div>
+                  <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Full Name</p>
+                  <p class="text-sm font-semibold text-on-background mt-0.5">{{ user.fullName }}</p>
+                </div>
               </div>
-              <button type="button" (click)="startEditFullName()" class="text-primary text-xs font-semibold hover:underline">Change</button>
+              <button type="button" (click)="startEditFullName()"
+                class="text-primary text-xs font-bold hover:underline shrink-0">Change</button>
             </div>
           </ng-container>
 
           <ng-template #fullNameForm>
-            <p class="text-xs text-on-surface-variant mb-1.5">Full Name</p>
+            <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-2">Full Name</p>
             <div class="flex gap-2">
               <input type="text" [ngModel]="fullNameInput()" (ngModelChange)="fullNameInput.set($event)"
-                     class="flex-1 px-3 py-1 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"/>
+                class="flex-1 px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm" />
               <button type="button" (click)="submitFullName()" [disabled]="fullNameLoading() || !fullNameInput().trim()"
-                      class="bg-primary text-on-primary px-3 py-1 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
+                class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
                 {{ fullNameLoading() ? 'Saving...' : 'Save' }}
               </button>
               <button type="button" (click)="showFullNameForm.set(false)"
-                      class="px-3 py-1 rounded-lg text-xs font-semibold border border-outline-variant hover:bg-surface-container-low">
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant hover:bg-surface-container-low">
                 Cancel
               </button>
             </div>
-            <p *ngIf="fullNameError()" class="text-error text-xs mt-1">{{ fullNameError() }}</p>
+            <p *ngIf="fullNameError()" class="text-error text-xs mt-1.5">{{ fullNameError() }}</p>
           </ng-template>
         </div>
 
         <!-- Username -->
-        <div class="py-2.5">
+        <div class="py-4">
           <ng-container *ngIf="user.username; else usernameSetup">
-            <p class="text-xs text-on-surface-variant">Username</p>
-            <p class="text-sm text-on-background">{{ user.username }}</p>
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">alternate_email</span>
+              <div>
+                <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Username</p>
+                <p class="text-sm text-on-background mt-0.5">{{ user.username }}</p>
+              </div>
+            </div>
           </ng-container>
 
           <ng-template #usernameSetup>
-            <div class="flex justify-between items-center mb-1.5">
-              <p class="text-xs text-on-surface-variant">Username</p>
+            <div class="flex justify-between items-center mb-2">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-outline text-[18px]">alternate_email</span>
+                <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Username</p>
+              </div>
               <button *ngIf="!showUsernameForm()" type="button" (click)="showUsernameForm.set(true)"
-                      class="text-primary text-xs font-semibold hover:underline">
+                class="text-primary text-xs font-bold hover:underline">
                 Set up username
               </button>
             </div>
             <div *ngIf="showUsernameForm()" class="flex gap-2">
-              <input type="text" placeholder="Choose a username"
-                     [ngModel]="usernameInput()" (ngModelChange)="usernameInput.set($event)"
-                     class="flex-1 px-3 py-1 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"/>
+              <input type="text" placeholder="Choose a username" [ngModel]="usernameInput()"
+                (ngModelChange)="usernameInput.set($event)"
+                class="flex-1 px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm" />
               <button type="button" (click)="submitUsername()" [disabled]="usernameLoading() || !usernameInput().trim()"
-                      class="bg-primary text-on-primary px-3 py-1 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
+                class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
                 {{ usernameLoading() ? 'Saving...' : 'Save' }}
               </button>
             </div>
-            <p *ngIf="usernameError()" class="text-error text-xs mt-1">{{ usernameError() }}</p>
+            <p *ngIf="usernameError()" class="text-error text-xs mt-1.5">{{ usernameError() }}</p>
           </ng-template>
         </div>
 
         <!-- Email -->
-        <div class="py-2.5">
-          <p class="text-xs text-on-surface-variant">Email Address</p>
-          <p class="text-sm text-on-background">{{ user.email }}</p>
+        <div class="py-4">
+          <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">mail</span>
+            <div>
+              <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Email Address</p>
+              <p class="text-sm text-on-background mt-0.5">{{ user.email }}</p>
+            </div>
+          </div>
         </div>
 
         <!-- Password -->
-        <div class="py-2.5">
+        <div class="py-4">
           <ng-container *ngIf="user.hasPassword; else passwordSetup">
-            <p class="text-xs text-on-surface-variant">Password</p>
-            <p class="text-sm font-bold text-on-background">Password already set</p>
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">lock</span>
+              <div>
+                <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Password</p>
+                <p class="text-sm font-semibold text-on-background mt-0.5 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-primary text-[15px]">check_circle</span>
+                  Already set
+                </p>
+              </div>
+            </div>
           </ng-container>
 
           <ng-template #passwordSetup>
-            <div class="flex justify-between items-center mb-1.5">
-              <p class="text-xs text-on-surface-variant">Password</p>
+            <div class="flex justify-between items-center mb-2">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-outline text-[18px]">lock</span>
+                <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Password</p>
+              </div>
               <button *ngIf="!showPasswordForm()" type="button" (click)="showPasswordForm.set(true)"
-                      class="text-primary text-xs font-semibold hover:underline">
+                class="text-primary text-xs font-bold hover:underline">
                 Set up password
               </button>
             </div>
@@ -106,35 +145,44 @@
             <div *ngIf="showPasswordForm()">
               <div class="relative">
                 <input [type]="showPasswordText() ? 'text' : 'password'" placeholder="Choose a password"
-                       [ngModel]="passwordInput()" (ngModelChange)="passwordInput.set($event)"
-                       class="w-full px-3 py-1 pr-10 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"/>
+                  [ngModel]="passwordInput()" (ngModelChange)="passwordInput.set($event)"
+                  class="w-full px-3 py-1.5 pr-10 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm" />
                 <button type="button" (click)="togglePasswordText()"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface">
-                  <span class="material-symbols-outlined text-[16px]">{{ showPasswordText() ? 'visibility_off' : 'visibility' }}</span>
+                  class="absolute right-2 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface">
+                  <span class="material-symbols-outlined text-[16px]">{{ showPasswordText() ? 'visibility_off' :
+                    'visibility' }}</span>
                 </button>
               </div>
 
-              <ul class="text-xs flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5">
-                <li class="flex items-center gap-1" [class.text-primary]="hasMinLength()" [class.text-on-surface-variant]="!hasMinLength()">
-                  <span class="material-symbols-outlined text-[13px]">{{ hasMinLength() ? 'check_circle' : 'radio_button_unchecked' }}</span>
+              <ul class="text-xs flex flex-wrap gap-x-3 gap-y-0.5 mt-2">
+                <li class="flex items-center gap-1" [class.text-primary]="hasMinLength()"
+                  [class.text-on-surface-variant]="!hasMinLength()">
+                  <span class="material-symbols-outlined text-[13px]">{{ hasMinLength() ? 'check_circle' :
+                    'radio_button_unchecked' }}</span>
                   8+ chars
                 </li>
-                <li class="flex items-center gap-1" [class.text-primary]="hasUppercase()" [class.text-on-surface-variant]="!hasUppercase()">
-                  <span class="material-symbols-outlined text-[13px]">{{ hasUppercase() ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                <li class="flex items-center gap-1" [class.text-primary]="hasUppercase()"
+                  [class.text-on-surface-variant]="!hasUppercase()">
+                  <span class="material-symbols-outlined text-[13px]">{{ hasUppercase() ? 'check_circle' :
+                    'radio_button_unchecked' }}</span>
                   Uppercase
                 </li>
-                <li class="flex items-center gap-1" [class.text-primary]="hasLowercase()" [class.text-on-surface-variant]="!hasLowercase()">
-                  <span class="material-symbols-outlined text-[13px]">{{ hasLowercase() ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                <li class="flex items-center gap-1" [class.text-primary]="hasLowercase()"
+                  [class.text-on-surface-variant]="!hasLowercase()">
+                  <span class="material-symbols-outlined text-[13px]">{{ hasLowercase() ? 'check_circle' :
+                    'radio_button_unchecked' }}</span>
                   Lowercase
                 </li>
-                <li class="flex items-center gap-1" [class.text-primary]="hasDigit()" [class.text-on-surface-variant]="!hasDigit()">
-                  <span class="material-symbols-outlined text-[13px]">{{ hasDigit() ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                <li class="flex items-center gap-1" [class.text-primary]="hasDigit()"
+                  [class.text-on-surface-variant]="!hasDigit()">
+                  <span class="material-symbols-outlined text-[13px]">{{ hasDigit() ? 'check_circle' :
+                    'radio_button_unchecked' }}</span>
                   Digit
                 </li>
               </ul>
 
               <button type="button" (click)="submitPassword()" [disabled]="passwordLoading() || !isPasswordValid()"
-                      class="w-full mt-1.5 bg-primary text-on-primary py-1 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
+                class="w-full mt-2 bg-primary text-on-primary py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
                 {{ passwordLoading() ? 'Saving...' : 'Save Password' }}
               </button>
               <p *ngIf="passwordError()" class="text-error text-xs mt-1">{{ passwordError() }}</p>
@@ -143,46 +191,55 @@
         </div>
 
         <!-- Profession -->
-        <div class="py-2.5">
+        <div class="py-4">
           <ng-container *ngIf="!showProfessionForm(); else professionForm">
             <div class="flex justify-between items-center">
-              <div>
-                <p class="text-xs text-on-surface-variant">Profession</p>
-                <p class="text-sm text-on-background">{{ user.profession || '—' }}</p>
+              <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">work</span>
+                <div>
+                  <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Profession</p>
+                  <p class="text-sm text-on-background mt-0.5">{{ user.profession || '—' }}</p>
+                </div>
               </div>
-              <button type="button" (click)="startEditProfession()" class="text-primary text-xs font-semibold hover:underline">Change</button>
+              <button type="button" (click)="startEditProfession()"
+                class="text-primary text-xs font-bold hover:underline shrink-0">Change</button>
             </div>
           </ng-container>
 
           <ng-template #professionForm>
-            <p class="text-xs text-on-surface-variant mb-1.5">Profession</p>
+            <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-2">Profession</p>
             <div class="flex gap-2">
               <input type="text" [ngModel]="professionInput()" (ngModelChange)="professionInput.set($event)"
-                     placeholder="e.g. Software Engineer"
-                     class="flex-1 px-3 py-1 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"/>
+                placeholder="e.g. Software Engineer"
+                class="flex-1 px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm" />
               <button type="button" (click)="submitProfession()" [disabled]="professionLoading()"
-                      class="bg-primary text-on-primary px-3 py-1 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
+                class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
                 {{ professionLoading() ? 'Saving...' : 'Save' }}
               </button>
               <button type="button" (click)="showProfessionForm.set(false)"
-                      class="px-3 py-1 rounded-lg text-xs font-semibold border border-outline-variant hover:bg-surface-container-low">
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant hover:bg-surface-container-low">
                 Cancel
               </button>
             </div>
-            <p *ngIf="professionError()" class="text-error text-xs mt-1">{{ professionError() }}</p>
+            <p *ngIf="professionError()" class="text-error text-xs mt-1.5">{{ professionError() }}</p>
           </ng-template>
         </div>
 
         <!-- Preferred Calendar -->
-        <div class="py-2.5">
-          <p class="text-xs text-on-surface-variant mb-1">Calendar Preference</p>
-          <div class="flex items-center gap-2">
-            <select [ngModel]="user.preferredCalendar" (ngModelChange)="changeCalendar($event)" [disabled]="calendarLoading()"
-                    class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg text-sm outline-none">
+        <div class="py-4">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="material-symbols-outlined text-outline text-[18px]">calendar_month</span>
+            <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Calendar Preference</p>
+          </div>
+          <div class="flex items-center gap-2 pl-8">
+            <select [ngModel]="user.preferredCalendar" (ngModelChange)="changeCalendar($event)"
+              [disabled]="calendarLoading()"
+              class="w-full px-3 py-1.5 bg-surface border border-outline-variant rounded-lg text-sm outline-none">
               <option value="English">English</option>
               <option value="Nepali">Nepali</option>
             </select>
-            <span *ngIf="calendarMessage()" class="text-primary text-xs whitespace-nowrap">{{ calendarMessage() }}</span>
+            <span *ngIf="calendarMessage()" class="text-primary text-xs whitespace-nowrap">{{ calendarMessage()
+              }}</span>
           </div>
         </div>
 
@@ -190,7 +247,7 @@
     </div>
 
     <button type="button" (click)="logoutEverywhere()"
-            class="shrink-0 w-full mt-3 bg-error text-on-error py-2 rounded-lg font-bold text-sm hover:opacity-90 transition-all">
+      class="shrink-0 w-full mt-4 bg-error/10 text-error border border-error/30 py-2.5 rounded-xl font-semibold text-sm hover:bg-error hover:text-on-error transition-all">
       Logout Everywhere
     </button>
   </ng-container>
