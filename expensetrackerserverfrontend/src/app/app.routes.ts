@@ -65,6 +65,11 @@ export const routes: Routes = [
           import('./features/expense/expense.component').then(m => m.ExpenseComponent)
       },
       {
+        path: 'budgets',
+        loadComponent: () =>
+          import('./features/budget/budget.component').then(m => m.BudgetComponent)
+      },
+      {
         path: 'dashboard',
         loadComponent: () =>
           import('./features/profile/profile.component').then(m => m.ProfileComponent) // placeholder until dashboard exists

@@ -100,6 +100,7 @@ export class AuthService {
     );
   }
   resendVerificationByEmail(payload: ResendByEmailRequest) {
+    
     return this.http.post(
       `${environment.apiUrl}/auth/resend-verification-by-email`,
       payload
