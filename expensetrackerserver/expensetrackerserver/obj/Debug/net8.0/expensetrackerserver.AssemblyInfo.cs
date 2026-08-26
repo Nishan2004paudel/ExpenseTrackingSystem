@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("expensetrackerserver")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+252b585344b65c3d7020320d849d2d9143e12ef8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f344737360c88d61b5707f956c125c3aafce016d")]
 [assembly: System.Reflection.AssemblyProductAttribute("expensetrackerserver")]
 [assembly: System.Reflection.AssemblyTitleAttribute("expensetrackerserver")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

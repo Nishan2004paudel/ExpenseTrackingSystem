@@ -1,4 +1,4 @@
-import { Component, signal, inject, computed } from '@angular/core';
+import { Component, signal, inject, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -7,6 +7,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { ApiError } from '../../../core/models/auth.model';
 import { GoogleButtonComponent } from '../google-button/google-button.component';
+import { RegisterFormStateService } from './register-form-state.service';
 
 
 function strongPasswordValidator(control: AbstractControl): ValidationErrors | null {
@@ -23,10 +24,11 @@ function strongPasswordValidator(control: AbstractControl): ValidationErrors | n
   imports: [CommonModule, ReactiveFormsModule, RouterLink, GoogleButtonComponent],
   templateUrl: './register.component.html'
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnDestroy {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private formState = inject(RegisterFormStateService);
 
   loading = signal(false);
   errorMessage = signal('');
@@ -44,6 +46,17 @@ export class RegisterComponent {
     profession: [''],
     agreeToTerms: [false, Validators.requiredTrue]
   });
+
+  constructor() {
+    const savedState = this.formState.getState();
+    if (savedState) {
+      this.form.patchValue(savedState);
+    }
+
+    this.form.valueChanges.subscribe(() => {
+      this.persistFormState();
+    });
+  }
   private passwordValue = toSignal(
     this.form.controls.password.valueChanges,
     { initialValue: '' }
@@ -56,6 +69,23 @@ export class RegisterComponent {
   togglePassword() {
     this.showPassword.update(v => !v);
   }
+  ngOnDestroy(): void {
+    this.persistFormState();
+  }
+
+  private persistFormState(): void {
+    const rawValue = this.form.getRawValue();
+    this.formState.saveState({
+      fullName: rawValue.fullName ?? '',
+      username: rawValue.username ?? '',
+      email: rawValue.email ?? '',
+      password: rawValue.password ?? '',
+      preferredCalendar: rawValue.preferredCalendar ?? 'English',
+      profession: rawValue.profession ?? '',
+      agreeToTerms: Boolean(rawValue.agreeToTerms)
+    });
+  }
+
   onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();

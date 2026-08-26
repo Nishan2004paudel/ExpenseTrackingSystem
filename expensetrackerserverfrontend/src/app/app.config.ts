@@ -7,6 +7,7 @@ import { AuthService } from './core/services/auth.service';
 import { ProfileService } from './core/services/profile.service';
 import { catchError, of } from 'rxjs';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { NotificationService } from './core/services/notification.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,6 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => {
       const auth = inject(AuthService);
       const profile = inject(ProfileService);
+      const notifications = inject(NotificationService);
 
       return new Promise<void>((resolve) => {
         auth.refresh().pipe(
@@ -23,7 +25,10 @@ export const appConfig: ApplicationConfig = {
           if (auth.isAuthenticated()) {
             profile.getMe().pipe(
               catchError(() => of(null))
-            ).subscribe(() => resolve());
+            ).subscribe(() => {
+              notifications.startConnection();
+              resolve();
+            });
           } else {
             resolve();
           }

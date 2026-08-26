@@ -87,3 +87,7 @@ export interface ChangeUsernameRequest {
   currentPassword: string;
   newUsername: string;
 }
+export interface ReactivateAccountRequest {
+  identifier: string;
+  password: string;
+}

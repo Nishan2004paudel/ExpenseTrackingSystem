@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { ExpenseService } from '../../core/services/expense.service';
 import { CategoryService } from '../../core/services/category.service';
 import { Expense } from '../../core/models/expense.model';
@@ -22,6 +23,7 @@ function todayIso(): string {
 export class ExpenseComponent implements OnInit {
   private expenseService = inject(ExpenseService);
   private categoryService = inject(CategoryService);
+  private route = inject(ActivatedRoute);
 
   expenses = signal<Expense[]>([]);
   categories = signal<Category[]>([]);
@@ -65,6 +67,13 @@ export class ExpenseComponent implements OnInit {
   ngOnInit() {
     this.fetchCategories();
     this.fetchExpenses();
+
+    this.route.queryParamMap.subscribe(params => {
+      const shouldOpenCreate = params.get('create') === '1';
+      if (shouldOpenCreate) {
+        this.openCreateForm();
+      }
+    });
   }
 
   fetchCategories() {

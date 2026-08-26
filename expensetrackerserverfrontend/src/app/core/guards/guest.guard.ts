@@ -10,6 +10,6 @@ export const guestGuard = () => {
     return true;
   }
 
-  router.navigate(['/profile']);
+  router.navigate(['/dashboard']);
   return false;
 };

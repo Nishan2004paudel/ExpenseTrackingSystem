@@ -1,0 +1,83 @@
+<div class="h-full flex flex-col overflow-hidden">
+  <div class="shrink-0 mb-3">
+    <h1 class="text-xl font-bold text-on-background tracking-tight">Admin · Users</h1>
+    <p class="text-on-surface-variant text-sm mt-0.5">Manage user accounts.</p>
+  </div>
+
+  <div class="flex-1 min-h-0 bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-sm flex flex-col overflow-hidden">
+    <div class="shrink-0 flex justify-between items-center px-5 py-4 border-b border-outline-variant">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[20px]">group</span>
+        <h3 class="text-[15px] font-bold text-on-background">{{ users().length }} User(s)</h3>
+      </div>
+    </div>
+
+    <div class="flex-1 min-h-0 overflow-y-auto px-5">
+      <p *ngIf="loading()" class="text-on-surface-variant text-sm py-4">Loading users...</p>
+      <p *ngIf="loadError()" class="text-error text-sm py-4">{{ loadError() }}</p>
+      <p *ngIf="actionError()" class="text-error text-sm mt-3">{{ actionError() }}</p>
+
+      <div *ngFor="let u of users()" class="py-3 border-b border-outline-variant/70 last:border-0">
+        <div class="flex justify-between items-center gap-4">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <p class="text-sm font-semibold text-on-background truncate">{{ u.fullName }}</p>
+              <span *ngIf="u.role === 'Admin'" class="bg-primary-container text-on-primary-container text-[10px] font-bold uppercase px-2 py-0.5 rounded-full">Admin</span>
+              <span *ngIf="isSelf(u.userId)" class="text-[10px] text-on-surface-variant uppercase">(You)</span>
+            </div>
+            <p class="text-xs text-on-surface-variant truncate">{{ u.email }}</p>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full"
+                    [class.bg-primary-container]="u.isActive" [class.text-on-primary-container]="u.isActive"
+                    [class.bg-error]="!u.isActive" [class.text-on-error]="!u.isActive">
+                {{ u.isActive ? 'Active' : 'Inactive' }}
+              </span>
+              <span *ngIf="!u.isActive && u.deactivationReason" class="text-[10px] text-on-surface-variant">
+                Deactivated by {{ u.deactivationReason }}
+              </span>
+              <span *ngIf="!u.isEmailVerified" class="text-[10px] text-error">Unverified</span>
+              <span class="text-[10px] text-on-surface-variant">{{ u.authProvider }}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <ng-container *ngIf="!isSelf(u.userId)">
+              <button *ngIf="u.isActive" type="button" (click)="deactivate(u.userId)" [disabled]="actionLoadingId() === u.userId"
+                      class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-error/40 text-error hover:bg-error/10 disabled:opacity-50">
+                {{ actionLoadingId() === u.userId ? '...' : 'Deactivate' }}
+              </button>
+              <button *ngIf="!u.isActive" type="button" (click)="activate(u.userId)" [disabled]="actionLoadingId() === u.userId"
+                      class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-primary/40 text-primary hover:bg-primary-container/30 disabled:opacity-50">
+                {{ actionLoadingId() === u.userId ? '...' : 'Activate' }}
+              </button>
+              <button type="button" (click)="startDelete(u.userId)"
+                      class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-error text-on-error hover:opacity-90">
+                Delete
+              </button>
+            </ng-container>
+          </div>
+        </div>
+
+        <div *ngIf="showDeleteConfirmId() === u.userId" class="mt-2 bg-error/5 border border-error/30 rounded-xl p-3">
+          <p class="text-xs text-on-surface-variant mb-2">
+            Permanently delete <strong>{{ u.fullName }}</strong>? Type <span class="font-bold text-error">DELETE</span> to confirm.
+          </p>
+          <div class="flex gap-2">
+            <input type="text" placeholder="Type DELETE"
+                   [ngModel]="deleteConfirmText()" (ngModelChange)="deleteConfirmText.set($event)"
+                   class="flex-1 px-3 py-1.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-error outline-none text-sm"/>
+            <button type="button" (click)="confirmDelete(u.userId)"
+                    [disabled]="actionLoadingId() === u.userId || deleteConfirmText().trim().toUpperCase() !== 'DELETE'"
+                    class="bg-error text-on-error px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50">
+              {{ actionLoadingId() === u.userId ? 'Deleting...' : 'Permanently Delete' }}
+            </button>
+            <button type="button" (click)="cancelDelete()"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant hover:bg-surface-container-low">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

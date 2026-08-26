@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-layout',
@@ -12,6 +13,7 @@ import { AuthService } from '../../core/services/auth.service';
 export class LayoutComponent {
   auth = inject(AuthService);
   private router = inject(Router);
+  private notifications = inject(NotificationService);
 
   sidebarCollapsed = signal(false);
 
@@ -20,6 +22,7 @@ export class LayoutComponent {
   }
 
   logout() {
+    this.notifications.stopConnection();
     this.auth.logout().subscribe({
       next: () => this.router.navigate(['/login']),
       error: () => this.router.navigate(['/login'])
