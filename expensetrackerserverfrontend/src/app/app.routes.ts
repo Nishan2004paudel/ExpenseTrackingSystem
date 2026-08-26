@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -39,6 +40,16 @@ export const routes: Routes = [
       import('./features/auth/verify-email/verify-email.component').then(m => m.VerifyEmailComponent)
   },
   {
+    path: 'terms-of-service',
+    loadComponent: () =>
+      import('./features/auth/terms/terms.component').then(m => m.TermsComponent)
+  },
+  {
+    path: 'privacy-policy',
+    loadComponent: () =>
+      import('./features/auth/privacy/privacy.component').then(m => m.PrivacyComponent)
+  },
+  {
     path: 'verify-email-change',
     loadComponent: () =>
       import('./features/settings/verify-email-change/verify-email-change.component').then(m => m.VerifyEmailChangeComponent)
@@ -59,7 +70,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/category/category.component').then(m => m.CategoryComponent)
       },
-            {
+      {
         path: 'expenses',
         loadComponent: () =>
           import('./features/expense/expense.component').then(m => m.ExpenseComponent)
@@ -72,12 +83,18 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./features/profile/profile.component').then(m => m.ProfileComponent) // placeholder until dashboard exists
+          import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
         path: 'settings',
         loadComponent: () =>
           import('./features/settings/settings.component').then(m => m.SettingsComponent)
+      },
+      {
+        path: 'admin',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/admin/admin.component').then(m => m.AdminComponent)
       }
     ]
   }

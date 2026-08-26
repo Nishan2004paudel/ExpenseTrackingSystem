@@ -23,7 +23,14 @@ export class SettingsComponent {
   emailLoading = signal(false);
   emailError = signal('');
   emailSuccess = signal('');
+  showDeactivateConfirm = signal(false);
+  deactivateLoading = signal(false);
+  deactivateError = signal('');
 
+  showDeleteConfirm = signal(false);
+  deleteConfirmText = signal('');
+  deleteLoading = signal(false);
+  deleteError = signal('');
   startChangeEmail() {
     this.currentPasswordInput.set('');
     this.newEmailInput.set('');
@@ -110,6 +117,41 @@ export class SettingsComponent {
 
   toggleNewPasswordText() {
     this.showNewPasswordText.update(v => !v);
+  }
+  confirmDeactivate() {
+    this.deactivateLoading.set(true);
+    this.deactivateError.set('');
+
+    this.auth.deactivateAccount().subscribe({
+      next: () => {
+        this.deactivateLoading.set(false);
+        this.router.navigate(['/login']);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.deactivateLoading.set(false);
+        const apiErr = err.error as ApiError;
+        this.deactivateError.set(apiErr?.message ?? 'Failed to deactivate account.');
+      }
+    });
+  }
+
+  confirmDelete() {
+    if (this.deleteConfirmText().trim().toUpperCase() !== 'DELETE') return;
+
+    this.deleteLoading.set(true);
+    this.deleteError.set('');
+
+    this.auth.deleteAccount().subscribe({
+      next: () => {
+        this.deleteLoading.set(false);
+        this.router.navigate(['/register']);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.deleteLoading.set(false);
+        const apiErr = err.error as ApiError;
+        this.deleteError.set(apiErr?.message ?? 'Failed to delete account.');
+      }
+    });
   }
 
   submitChangePassword() {

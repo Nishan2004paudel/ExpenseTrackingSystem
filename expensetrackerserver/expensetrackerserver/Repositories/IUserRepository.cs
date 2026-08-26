@@ -34,5 +34,8 @@ namespace expensetrackerserver.Repositories
         Task UpdatePendingEmail(int userId, string pendingEmail, string token, DateTime expiresAt);
         Task<User?> GetByPendingEmailVerificationToken(string token);
         Task ConfirmPendingEmail(int userId);
+        Task DeactivateSelf(int userId);
+        Task ReactivateSelf(int userId);
+        Task DeleteSelf(int userId);
     }
 }

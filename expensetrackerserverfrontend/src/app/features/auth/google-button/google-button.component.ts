@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { ApiError } from '../../../core/models/auth.model';
-
+import { NotificationService } from '../../../core/services/notification.service';
 declare const google: any;
 
 @Component({
@@ -15,10 +15,9 @@ declare const google: any;
 })
 export class GoogleButtonComponent implements OnInit {
   @Input() label = 'Continue with Google';
-
   private auth = inject(AuthService);
   private router = inject(Router);
-
+  private notifications = inject(NotificationService);
   errorMessage = signal('');
 
   ngOnInit() {
@@ -40,9 +39,11 @@ export class GoogleButtonComponent implements OnInit {
 
   private handleCredential(idToken: string) {
     this.errorMessage.set('');
-
     this.auth.googleLogin({ idToken }).subscribe({
-      next: () => this.router.navigate(['/profile']),
+      next: () => {
+        this.notifications.startConnection();
+        this.router.navigate(['/dashboard']);
+      },
       error: (err: HttpErrorResponse) => {
         const apiErr = err.error as ApiError;
         this.errorMessage.set(apiErr?.message ?? 'Google sign-in failed. Please try again.');

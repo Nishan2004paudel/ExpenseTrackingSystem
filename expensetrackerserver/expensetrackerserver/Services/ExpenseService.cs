@@ -8,10 +8,14 @@ namespace expensetrackerserver.Services
     {
         private readonly IExpenseRepository _repo;
         private readonly ICategoryRepository _catrepo;
-        public ExpenseService(IExpenseRepository repo, ICategoryRepository catrepo)
+        private readonly INotificationService _notificationService;
+        private readonly IBudgetRepository _budgetRepo;
+        public ExpenseService(IExpenseRepository repo, ICategoryRepository catrepo, INotificationService notificationService, IBudgetRepository budgetRepo)
         {
             _repo = repo;
             _catrepo = catrepo;
+            _notificationService = notificationService;
+            _budgetRepo = budgetRepo;
         }
 
         public async Task<ExpenseDto> Create(CreateExpenseDto dto, int userId)
@@ -40,8 +44,24 @@ namespace expensetrackerserver.Services
                 ExpenseDate = dto.ExpenseDate,
                 Description = dto.Description
             };
+            var previousBudgetUsage = await _budgetRepo.GetBudgetUsage(userId, expense.CategoryId, expense.ExpenseDate);
+            decimal previousPercentage = 0;
+            if (previousBudgetUsage != null && previousBudgetUsage.BudgetAmount > 0)
+            {
+                previousPercentage = (previousBudgetUsage.ExpenseAmount / previousBudgetUsage.BudgetAmount) * 100;
+            }
 
             var expenseId = await _repo.Create(expense);
+            var currentBudgetUsage = await _budgetRepo.GetBudgetUsage(userId, expense.CategoryId, expense.ExpenseDate);
+
+            if (currentBudgetUsage != null && currentBudgetUsage.BudgetAmount > 0)
+            {
+                var currentPercentage = (currentBudgetUsage.ExpenseAmount / currentBudgetUsage.BudgetAmount) * 100;
+                if (previousPercentage < 70 && currentPercentage >= 70)
+                {
+                    await _notificationService.CreateNotification(userId, "Budget Alert", $"You have used {currentPercentage:F0}% of your {category.CategoryName} budget for {expense.ExpenseDate:MMMM yyyy}.");
+                }
+            }
 
             return new ExpenseDto
             {

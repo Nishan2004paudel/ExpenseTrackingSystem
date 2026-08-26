@@ -120,7 +120,18 @@ namespace expensetrackerserver.Services
             {
                 throw new EmailNotVerifiedException("Please verify your email before logging in.");
             }
-
+            if (!user.IsActive)
+            {
+                if (user.DeactivationReason == "Admin")
+                {
+                    throw new InvalidOperationException("Your account hasbeen deactivated by an administrator. Please contact an administrator to reactivate.");
+                }
+                if (user.DeactivationReason == "User")
+                {
+                    throw new InvalidOperationException("Your account is currently deactivated. Please reactivate your account to continue.");
+                }
+                throw new InvalidOperationException("Your account is currently inactive.");
+            }
             var accessToken = _jwtService.GenerateAccessToken(user);
             var refreshToken = _jwtService.GenerateRefreshToken();
 
@@ -170,6 +181,19 @@ namespace expensetrackerserver.Services
             if (user == null)
             {
                 throw new UserNotFoundException();
+            }
+            if (!user.IsActive)
+            {
+                await _refreshRepo.Revoke(storedToken.RefreshTokenId);
+
+                if (user.DeactivationReason == "Admin")
+                {
+                    throw new InvalidOperationException(
+                        "Your account has been deactivated by an administrator. Please contact an administrator.");
+                }
+
+                throw new InvalidOperationException(
+                    "Your account is currently deactivated.");
             }
 
             await _refreshRepo.Revoke(storedToken.RefreshTokenId);
@@ -294,10 +318,32 @@ namespace expensetrackerserver.Services
             }
             var user = await _repo.GetByEmail(payload.Email);
 
-            if (user != null && !user.IsEmailVerified)
+
+            if (user != null)
             {
-                await _repo.VerifyEmail(user.UserId);
-                user.IsEmailVerified = true;
+                if (!user.IsActive)
+                {
+                    if (user.DeactivationReason == "Admin")
+                    {
+                        throw new InvalidOperationException(
+                            "Your account has been deactivated by an administrator. Please contact an administrator to reactivate.");
+                    }
+
+                    if (user.DeactivationReason == "User")
+                    {
+                        throw new InvalidOperationException(
+                            "Your account is currently deactivated. Please reactivate your account to continue.");
+                    }
+
+                    throw new InvalidOperationException(
+                        "Your account is currently inactive.");
+                }
+
+                if (!user.IsEmailVerified)
+                {
+                    await _repo.VerifyEmail(user.UserId);
+                    user.IsEmailVerified = true;
+                }
             }
 
 
@@ -374,7 +420,18 @@ namespace expensetrackerserver.Services
                     Message = "If an account exists with this identifier, a password reset link has been sent."
                 };
             }
-
+            if (!user.IsActive)
+            {
+                return new MessageResponseDto
+                {
+                    Message = "If an account exists with this identifier, a password reset link has been sent."
+                };
+            }
+            if (!user.IsEmailVerified)
+            {
+                throw new EmailNotVerifiedException(
+                    "Please verify your email before resetting your password.");
+            }
 
             var resetToken = _jwtService.GeneratePasswordResetToken();
             var expiresAt = DateTime.UtcNow.AddHours(1);
@@ -400,6 +457,11 @@ namespace expensetrackerserver.Services
             {
                 throw new PasswordResetExpiredException("Password reset link has expired.Please request a new password reset email.");
             }
+            if (!user.IsActive)
+            {
+                throw new InvalidPasswordResetException(
+                    "Password reset is not available for an inactive account.");
+            }
             ValidatePassword(dto.Password);
 
             if (!string.IsNullOrEmpty(user.Password) &&
@@ -423,6 +485,75 @@ namespace expensetrackerserver.Services
             {
                 Message = "Password reset successfully. Please log in again."
             };
+        }
+
+        public async Task DeactivateSelf(int userId)
+        {
+            var user = await _repo.GetById(userId);
+            if (user == null)
+            {
+                throw new UserNotFoundException();
+            }
+            if (!user.IsActive)
+            {
+                throw new InvalidOperationException("Your account is already deactivated.");
+            }
+            if (user.Role == "Admin")
+            {
+                throw new InvalidOperationException(
+                    "An administrator cannot deactivate their own account.");
+            }
+            if (string.IsNullOrEmpty(user.Password))
+            {
+                throw new InvalidOperationException(
+                    "Please set a password before deactivating your account. " +
+                    "Otherwise, you will need an administrator to reactivate your account.");
+            }
+            await _repo.DeactivateSelf(userId);
+            await _refreshRepo.RevokeAllByUserId(userId);
+        }
+
+        public async Task ReactivateSelf(ReactiveAccountDto dto)
+        {
+            var user = await _repo.GetByEmailOrUsername(dto.Identifier);
+            if (user == null)
+            {
+                throw new UserNotFoundException();
+            }
+            if (user.IsActive)
+            {
+                throw new InvalidOperationException("Your account is already active.");
+            }
+
+            if (user.DeactivationReason == "Admin")
+            {
+                throw new InvalidOperationException("Your account was deactivated by an administrator. Please contact an administrator to reactivate again.");
+            }
+            if (user.DeactivationReason != "User")
+            {
+                throw new InvalidOperationException("Your cannot be reactivated.");
+            }
+            if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
+            {
+                throw new InvalidCredentialsException(
+                    "Invalid username/email or password.");
+            }
+            await _repo.ReactivateSelf(user.UserId);
+        }
+
+        public async Task DeleteSelf(int userId)
+        {
+            var user = await _repo.GetById(userId);
+            if (user == null)
+            {
+                throw new UserNotFoundException();
+            }
+            if (user.Role == "Admin")
+            {
+                throw new InvalidOperationException(
+                    "An administrator cannot delete their own account.");
+            }
+            await _repo.DeleteSelf(userId);
         }
     }
 }

@@ -270,5 +270,66 @@ namespace expensetrackerserver.Repositories
                 UserId = userId
             });
         }
+
+        public async Task DeactivateSelf(int userId)
+        {
+            var sql = @"UPDATE [User] SET IsActive = 0, DeactivatedBy = @UserId, DeactivatedAt = GETDATE(), DeactivationReason = 'User', TokenVersion = TokenVersion + 1,UpdatedAt = GETDATE() WHERE UserId = @UserId AND IsActive = 1;";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId
+            });
+        }
+
+        public async Task ReactivateSelf(int userId)
+        {
+            var sql = @"UPDATE [User] SET IsActive = 1, DeactivatedBy = NULL, DeactivatedAT = NULL, DeactivationReason = NULL, TokenVersion = TokenVersion + 1, UpdatedAt = GETDATE() WHERE UserId = @UserId AND IsActive = 0 AND DeactivationReason = 'User';";
+            using var connection = _context.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId
+            });
+        }
+
+        public async Task DeleteSelf(int userId)
+        {
+            using var connection = _context.CreateConnection();
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                await connection.ExecuteAsync(
+                    "DELETE FROM RefreshToken WHERE UserId = @UserId",
+                    new { UserId = userId },
+                    transaction);
+
+                await connection.ExecuteAsync(
+                    "DELETE FROM Expense WHERE UserId = @UserId",
+                    new { UserId = userId },
+                    transaction);
+
+                await connection.ExecuteAsync(
+                    "DELETE FROM BudgetLimit WHERE UserId = @UserId",
+                    new { UserId = userId },
+                    transaction);
+
+                await connection.ExecuteAsync(
+                    "DELETE FROM Category WHERE UserId = @UserId",
+                    new { UserId = userId },
+                    transaction);
+
+                await connection.ExecuteAsync(
+                    "DELETE FROM [User] WHERE UserId = @UserId",
+                    new { UserId = userId },
+                    transaction);
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
     }
 }
