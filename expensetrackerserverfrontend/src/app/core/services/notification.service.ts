@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import * as signalR from '@microsoft/signalr';
 import { environment } from '../../../environments/environment';
@@ -12,6 +12,10 @@ export class NotificationService {
 
   private hubConnection?: signalR.HubConnection;
 
+  notifications = signal<Notification[]>([]);
+  unreadCount = computed(() => this.notifications().filter(n => !n.isRead).length);
+  unreadNotifications = computed(() => this.notifications().filter(n => !n.isRead));
+  readNotifications = computed(() => this.notifications().filter(n => n.isRead));
   // --- REST calls ---
 
   getAll() {
@@ -30,11 +34,37 @@ export class NotificationService {
     return this.http.patch<{ message: string }>(`${environment.apiUrl}/notification/read-all`, {});
   }
 
+  // --- Load + sync into the reactive list ---
+
+  loadNotifications() {
+    this.getAll().subscribe({
+      next: (list) => this.notifications.set(list)
+    });
+  }
+
+  markOneAsReadLocal(notificationId: number) {
+    this.markAsRead(notificationId).subscribe({
+      next: () => {
+        this.notifications.update(list =>
+          list.map(n => n.notificationId === notificationId ? { ...n, isRead: true } : n)
+        );
+      }
+    });
+  }
+
+  markAllAsReadLocal() {
+    this.markAllAsRead().subscribe({
+      next: () => {
+        this.notifications.update(list => list.map(n => ({ ...n, isRead: true })));
+      }
+    });
+  }
+
   // --- SignalR connection ---
 
   startConnection() {
     if (this.hubConnection) {
-      return; // already connected/connecting
+      return;
     }
 
     this.hubConnection = new signalR.HubConnectionBuilder()
@@ -45,12 +75,12 @@ export class NotificationService {
       .build();
 
     this.hubConnection.on('ReceiveNotification', (notification: Notification) => {
-      console.log('Received notification:', notification);
+      this.notifications.update(list => [notification, ...list]);
     });
 
     this.hubConnection
       .start()
-      .then(() => console.log('SignalR connected'))
+      .then(() => this.loadNotifications())
       .catch(err => console.error('SignalR connection error:', err));
   }
 
@@ -59,5 +89,6 @@ export class NotificationService {
       this.hubConnection.stop();
       this.hubConnection = undefined;
     }
+    this.notifications.set([]);
   }
 }

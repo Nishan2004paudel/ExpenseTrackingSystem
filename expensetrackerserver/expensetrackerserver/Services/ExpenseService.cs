@@ -110,6 +110,16 @@ namespace expensetrackerserver.Services
             {
                 throw new ExpenseAccessDeniedException("You are not allowed to modify this expense.");
             }
+            var previousBudgetUsage = await _budgetRepo.GetBudgetUsage(userId, dto.CategoryId, dto.ExpenseDate, expenseId);
+            decimal previousPercentage = 0;
+
+            if (previousBudgetUsage != null &&
+                previousBudgetUsage.BudgetAmount > 0)
+            {
+                previousPercentage =
+                    (previousBudgetUsage.ExpenseAmount /
+                     previousBudgetUsage.BudgetAmount) * 100;
+            }
 
             var category = await _catrepo.GetById(dto.CategoryId);
 
@@ -139,6 +149,17 @@ namespace expensetrackerserver.Services
             };
 
             await _repo.Update(updatedExpense);
+
+            var currentBudgetUsage = await _budgetRepo.GetBudgetUsage(userId, updatedExpense.CategoryId, updatedExpense.ExpenseDate);
+            decimal currentPercentage = 0;
+            if (currentBudgetUsage != null && currentBudgetUsage.BudgetAmount > 0)
+            {
+                currentPercentage = (currentBudgetUsage.ExpenseAmount / currentBudgetUsage.BudgetAmount) * 100;
+            }
+            if (previousPercentage < 70 && currentPercentage >= 70)
+            {
+                await _notificationService.CreateNotification(userId, "Budget Alert", $"You have used {currentPercentage:F0}% of your {category.CategoryName} budget for {updatedExpense.ExpenseDate:MMMM yyyy}.");
+            }
 
             return new ExpenseDto
             {

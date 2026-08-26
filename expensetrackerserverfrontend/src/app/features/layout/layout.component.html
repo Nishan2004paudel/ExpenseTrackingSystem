@@ -1,9 +1,10 @@
-<div class="h-screen flex overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(103,80,164,0.16),_transparent_35%),linear-gradient(135deg,_#f8fafc_0%,_#eef2ff_100%)] text-on-background">
+<div
+  class="h-screen flex overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(103,80,164,0.16),_transparent_35%),linear-gradient(135deg,_#f8fafc_0%,_#eef2ff_100%)] text-on-background">
   <aside [class.w-20]="sidebarCollapsed()" [class.w-72]="!sidebarCollapsed()"
-         class="shrink-0 flex h-screen flex-col border-r border-outline-variant/70 bg-surface-container-highest/95 p-3 shadow-[0_0_40px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-[width,transform] duration-300 ease-out">
+    class="relative z-30 shrink-0 flex h-screen flex-col border-r border-outline-variant/70 bg-surface-container-highest/95 p-3 shadow-[0_0_40px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-[width,transform] duration-300 ease-out">
     <div class="mb-5 flex items-center gap-3" [class.justify-center]="sidebarCollapsed()">
       <button type="button" (click)="toggleSidebar()"
-              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-outline-variant/70 bg-surface-container-low text-on-surface-variant shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-outline hover:bg-surface-container-high hover:text-on-surface">
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-outline-variant/70 bg-surface-container-low text-on-surface-variant shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-outline hover:bg-surface-container-high hover:text-on-surface">
         <span class="material-symbols-outlined text-[20px]">
           {{ sidebarCollapsed() ? 'menu' : 'menu_open' }}
         </span>
@@ -17,53 +18,136 @@
     </div>
 
     <nav class="flex-1 space-y-1.5 overflow-hidden pr-1">
-      <a routerLink="/dashboard" routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
-         [class.justify-center]="sidebarCollapsed()"
-         class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all duration-200 before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface" title="Dashboard">
+      <a routerLink="/dashboard"
+        routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
+        [class.justify-center]="sidebarCollapsed()"
+        class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all duration-200 before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface"
+        title="Dashboard">
         <span class="material-symbols-outlined text-[20px] shrink-0">dashboard</span>
         <span *ngIf="!sidebarCollapsed()">Dashboard</span>
       </a>
-      <a routerLink="/profile" routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
-         [class.justify-center]="sidebarCollapsed()"
-         class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface" title="Profile">
+      <a routerLink="/profile"
+        routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
+        [class.justify-center]="sidebarCollapsed()"
+        class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface"
+        title="Profile">
         <span class="material-symbols-outlined text-[20px] shrink-0">person</span>
         <span *ngIf="!sidebarCollapsed()">Profile</span>
       </a>
-      <a routerLink="/categories" routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
-         [class.justify-center]="sidebarCollapsed()"
-         class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface" title="Categories">
+      <a routerLink="/categories"
+        routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
+        [class.justify-center]="sidebarCollapsed()"
+        class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface"
+        title="Categories">
         <span class="material-symbols-outlined text-[20px] shrink-0">category</span>
         <span *ngIf="!sidebarCollapsed()">Categories</span>
       </a>
-      <a routerLink="/expenses" routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
-         [class.justify-center]="sidebarCollapsed()"
-         class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface" title="Expenses">
+      <a routerLink="/expenses"
+        routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
+        [class.justify-center]="sidebarCollapsed()"
+        class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface"
+        title="Expenses">
         <span class="material-symbols-outlined text-[20px] shrink-0">receipt_long</span>
         <span *ngIf="!sidebarCollapsed()">Expenses</span>
       </a>
-      <a routerLink="/budgets" routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
-         [class.justify-center]="sidebarCollapsed()"
-         class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface" title="Budgets">
+      <a routerLink="/budgets"
+        routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
+        [class.justify-center]="sidebarCollapsed()"
+        class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface"
+        title="Budgets">
         <span class="material-symbols-outlined text-[20px] shrink-0">savings</span>
         <span *ngIf="!sidebarCollapsed()">Budgets</span>
       </a>
-      <a routerLink="/settings" routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
-         [class.justify-center]="sidebarCollapsed()"
-         class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface" title="Settings">
+      <a routerLink="/settings"
+        routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
+        [class.justify-center]="sidebarCollapsed()"
+        class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface"
+        title="Settings">
         <span class="material-symbols-outlined text-[20px] shrink-0">settings</span>
         <span *ngIf="!sidebarCollapsed()">Settings</span>
       </a>
-      <a *ngIf="auth.currentUser()?.role === 'Admin'" routerLink="/admin" routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
-         [class.justify-center]="sidebarCollapsed()"
-         class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface" title="Admin">
+      <a *ngIf="auth.currentUser()?.role === 'Admin'" routerLink="/admin"
+        routerLinkActive="bg-primary-container text-on-primary-container font-semibold shadow-sm before:opacity-100"
+        [class.justify-center]="sidebarCollapsed()"
+        class="relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[4px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity hover:bg-surface-container-low hover:text-on-surface"
+        title="Admin">
         <span class="material-symbols-outlined text-[20px] shrink-0">admin_panel_settings</span>
         <span *ngIf="!sidebarCollapsed()">Admin</span>
       </a>
     </nav>
 
+    <div class="shrink-0 relative mb-2" data-notification-section>
+      <button type="button" (click)="toggleNotificationPanel()" [class.justify-center]="sidebarCollapsed()"
+        class="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-on-surface-variant transition-all hover:bg-surface-container-low hover:text-on-surface">
+        <span class="relative shrink-0">
+          <span class="material-symbols-outlined text-[20px]">notifications</span>
+          <span *ngIf="notifications.unreadCount() > 0"
+            class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-error text-on-error text-[9px] font-bold">
+            {{ notifications.unreadCount() > 9 ? '9+' : notifications.unreadCount() }}
+          </span>
+        </span>
+        <span *ngIf="!sidebarCollapsed()">Notifications</span>
+      </button>
+
+      <div *ngIf="showNotificationPanel()"
+        class="absolute bottom-full left-0 mb-2 w-80 max-h-96 bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xl flex flex-col overflow-hidden z-[70]">
+        <div class="shrink-0 flex justify-between items-center px-4 py-3 border-b border-outline-variant">
+          <p class="text-sm font-bold text-on-background">Notifications</p>
+          <button *ngIf="notifications.unreadCount() > 0" type="button" (click)="markAllAsRead()"
+            class="text-primary text-xs font-semibold hover:underline">
+            Mark all as read
+          </button>
+        </div>
+
+        <div class="flex-1 min-h-0 overflow-y-auto">
+          <p *ngIf="notifications.notifications().length === 0"
+            class="text-on-surface-variant text-sm text-center py-6">
+            No notifications yet.
+          </p>
+
+          <!-- Unread -->
+          <div *ngFor="let n of notifications.unreadNotifications()" (click)="markAsRead(n.notificationId)"
+            class="px-4 py-3 border-b border-outline-variant/70 cursor-pointer hover:bg-surface-container-low transition-colors">
+            <div class="flex items-start gap-2">
+              <span class="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0"></span>
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-on-background">{{ n.title }}</p>
+                <p class="text-xs text-on-surface-variant mt-0.5">{{ n.message }}</p>
+                <p class="text-[10px] text-on-surface-variant mt-1">{{ n.createdAt | date:'short' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Previous (read) -->
+          <div *ngIf="notifications.readNotifications().length > 0">
+            <button type="button" (click)="showPreviousNotifications.set(!showPreviousNotifications())"
+              class="w-full flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-on-surface-variant hover:bg-surface-container-low transition-colors">
+              <span>Previous ({{ notifications.readNotifications().length }})</span>
+              <span class="material-symbols-outlined text-[16px]">
+                {{ showPreviousNotifications() ? 'expand_less' : 'expand_more' }}
+              </span>
+            </button>
+
+            <div *ngIf="showPreviousNotifications()">
+              <div *ngFor="let n of notifications.readNotifications()"
+                class="px-4 py-3 border-b border-outline-variant/70 last:border-0 opacity-60">
+                <div class="pl-4 min-w-0">
+                  <p class="text-sm font-semibold text-on-background">{{ n.title }}</p>
+                  <p class="text-xs text-on-surface-variant mt-0.5">{{ n.message }}</p>
+                  <p class="text-[10px] text-on-surface-variant mt-1">{{ n.createdAt | date:'short' }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="shrink-0 rounded-2xl border border-outline-variant/70 bg-surface-container-low p-3 shadow-sm">
-      <div *ngIf="auth.currentUser() as user" class="flex items-center gap-3 transition-all duration-200" [class.justify-center]="sidebarCollapsed()">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-container text-sm font-semibold text-on-primary-container">
+      <div *ngIf="auth.currentUser() as user" class="flex items-center gap-3 transition-all duration-200"
+        [class.justify-center]="sidebarCollapsed()">
+        <div
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-container text-sm font-semibold text-on-primary-container">
           {{ user.fullName?.charAt(0) || 'U' }}
         </div>
         <div *ngIf="!sidebarCollapsed()" class="min-w-0">
@@ -72,18 +156,18 @@
         </div>
       </div>
 
-      <button type="button" (click)="logout()"
-              [class.justify-center]="sidebarCollapsed()"
-              class="mt-3 flex w-full items-center gap-2 rounded-xl bg-error/10 px-3 py-2 text-sm font-semibold text-error transition-colors duration-200 hover:bg-error/15">
+      <button type="button" (click)="logout()" [class.justify-center]="sidebarCollapsed()"
+        class="mt-3 flex w-full items-center gap-2 rounded-xl bg-error/10 px-3 py-2 text-sm font-semibold text-error transition-colors duration-200 hover:bg-error/15">
         <span class="material-symbols-outlined text-[18px] shrink-0">logout</span>
         <span *ngIf="!sidebarCollapsed()">Logout</span>
       </button>
     </div>
   </aside>
 
-  <main class="flex-1 h-screen flex flex-col overflow-hidden">
+  <main class="relative z-10 flex-1 h-screen flex flex-col overflow-hidden">
     <div class="flex-1 min-h-0 overflow-auto p-4 sm:p-6 lg:p-8">
-      <div class="mx-auto flex h-full w-full max-w-6xl flex-col rounded-[32px] border border-outline-variant/70 bg-surface-container-lowest/95 p-4 shadow-[0_18px_70px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-6 lg:p-8">
+      <div
+        class="mx-auto flex h-full w-full max-w-6xl flex-col rounded-[32px] border border-outline-variant/70 bg-surface-container-lowest/95 p-4 shadow-[0_18px_70px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-6 lg:p-8">
         <div class="flex-1 min-h-0">
           <router-outlet></router-outlet>
         </div>
