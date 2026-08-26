@@ -1,4 +1,4 @@
-﻿
+﻿using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using expensetrackerserver.Services;
 using expensetrackerserver.DTOs;
@@ -43,6 +43,7 @@ namespace expensetrackerserver.Controllers
 
         }
 
+        [EnableRateLimiting("login")]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
@@ -56,7 +57,7 @@ namespace expensetrackerserver.Controllers
             return Ok(response);
         }
 
- 
+
 
 
         [HttpPost("refresh")]
@@ -166,6 +167,39 @@ GetRefreshCookieOptions());
      GetRefreshCookieOptions());
 
             return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPost("deactivate")]
+        public async Task<IActionResult> DeactivateSelf()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            await _service.DeactivateSelf(userId);
+            Response.Cookies.Delete("refreshToken", GetRefreshCookieOptions());
+            return Ok(new MessageResponseDto
+            {
+                Message = "Your account has been deactivated successfully."
+            });
+        }
+
+        [HttpPost("reactivate")]
+        public async Task<IActionResult> ReactivateSelf(ReactiveAccountDto dto)
+        {
+            await _service.ReactivateSelf(dto);
+            return Ok(new MessageResponseDto
+            {
+                Message = "Your account has been reactivated successfully."
+            });
+        }
+
+        [Authorize]
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteSelf()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            await _service.DeleteSelf(userId);
+            Response.Cookies.Delete("refreshToken", GetRefreshCookieOptions());
+            return NoContent();
         }
     }
 }

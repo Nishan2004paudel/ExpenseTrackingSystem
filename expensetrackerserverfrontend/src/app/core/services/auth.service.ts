@@ -11,7 +11,8 @@ import {
   ResendByEmailRequest,
   GoogleLoginRequest,
   ForgotPasswordRequest,
-  ResetPasswordRequest
+  ResetPasswordRequest,
+  ReactivateAccountRequest
 } from '../models/auth.model';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -50,7 +51,7 @@ export class AuthService {
   }
 
 
- 
+
 
   private setSession(res: LoginResponse) {
     this.accessToken = res.accessToken;
@@ -100,7 +101,7 @@ export class AuthService {
     );
   }
   resendVerificationByEmail(payload: ResendByEmailRequest) {
-    
+
     return this.http.post(
       `${environment.apiUrl}/auth/resend-verification-by-email`,
       payload
@@ -119,5 +120,20 @@ export class AuthService {
       `${environment.apiUrl}/auth/verify/email`,
       { params: { token } }
     );
+  }
+  deactivateAccount() {
+    return this.http
+      .post<{ message: string }>(`${environment.apiUrl}/auth/deactivate`, {}, { withCredentials: true })
+      .pipe(tap(() => this.clearSession()));
+  }
+
+  reactivateAccount(payload: ReactivateAccountRequest) {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/reactivate`, payload);
+  }
+
+  deleteAccount() {
+    return this.http
+      .delete<void>(`${environment.apiUrl}/auth/delete`, { withCredentials: true })
+      .pipe(tap(() => this.clearSession()));
   }
 }

@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { BudgetService } from '../../core/services/budget.service';
 import { CategoryService } from '../../core/services/category.service';
 import { Budget } from '../../core/models/budget.model';
@@ -22,6 +23,7 @@ function currentMonthIso(): string {
 export class BudgetComponent implements OnInit {
   private budgetService = inject(BudgetService);
   private categoryService = inject(CategoryService);
+  private route = inject(ActivatedRoute);
 
   budgets = signal<Budget[]>([]);
   categories = signal<Category[]>([]);
@@ -50,6 +52,13 @@ export class BudgetComponent implements OnInit {
   ngOnInit() {
     this.fetchCategories();
     this.fetchBudgets();
+
+    this.route.queryParamMap.subscribe(params => {
+      const shouldOpenCreate = params.get('create') === '1';
+      if (shouldOpenCreate) {
+        this.openCreateForm();
+      }
+    });
   }
 
   fetchCategories() {

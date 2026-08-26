@@ -1,6 +1,38 @@
 [
   {
     "ContainingType": "expensetrackerserver.Controllers.AuthController",
+    "Method": "ForgotPassword",
+    "RelativePath": "api/Auth/forgot-password",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.ForgotPasswordDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.AuthController",
+    "Method": "GoogleLogin",
+    "RelativePath": "api/Auth/google-login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.GoogleLoginDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.AuthController",
     "Method": "Login",
     "RelativePath": "api/Auth/login",
     "HttpMethod": "POST",
@@ -30,16 +62,6 @@
     "Method": "LogoutEverywhere",
     "RelativePath": "api/Auth/logout/everywhere",
     "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "expensetrackerserver.Controllers.AuthController",
-    "Method": "Me",
-    "RelativePath": "api/Auth/me",
-    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
@@ -98,6 +120,22 @@
       {
         "Name": "dto",
         "Type": "expensetrackerserver.DTOs.ResendVerificationByEmailDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.AuthController",
+    "Method": "ResetPassword",
+    "RelativePath": "api/Auth/reset-password",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.ResetPasswordDto",
         "IsRequired": true
       }
     ],
@@ -256,6 +294,11 @@
       {
         "Name": "categoryId",
         "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.DeleteCategoryDto",
         "IsRequired": true
       }
     ],
@@ -462,6 +505,160 @@
         "Name": "expenseId",
         "Type": "System.Int32",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.ProfileController",
+    "Method": "UpdateFullName",
+    "RelativePath": "api/Profile/full-name",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.UpdateFullNameDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.ProfileController",
+    "Method": "Me",
+    "RelativePath": "api/Profile/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.ProfileController",
+    "Method": "ChangePreferredCalendar",
+    "RelativePath": "api/Profile/preferred-calendar",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.UpdatePreferredCalendarDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.ProfileController",
+    "Method": "UpdateProfession",
+    "RelativePath": "api/Profile/profession",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.UpdateProfessionDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.ProfileController",
+    "Method": "SetupPassword",
+    "RelativePath": "api/Profile/setup-password",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.SetupPasswordDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.ProfileController",
+    "Method": "SetupUsername",
+    "RelativePath": "api/Profile/setup-username",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.SetupUsernameDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.SettingsController",
+    "Method": "ChangePassword",
+    "RelativePath": "api/Settings/change-password",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.ChangePasswordDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.SettingsController",
+    "Method": "ChangeEmail",
+    "RelativePath": "api/Settings/email",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.ChangeEmailDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.SettingsController",
+    "Method": "ChangeUsername",
+    "RelativePath": "api/Settings/username",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "expensetrackerserver.DTOs.ChangeUsernameDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "expensetrackerserver.Controllers.SettingsController",
+    "Method": "VerifyEmailChange",
+    "RelativePath": "api/Settings/verify-email-change",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "token",
+        "Type": "System.String",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
