@@ -198,10 +198,12 @@ namespace expensetrackerserver.Repositories
 
         }
 
-        public async Task<BudgetUsageDto?> GetBudgetUsage(int userId, int categoryId, DateTime expenseDate)
+        public async Task<BudgetUsageDto?> GetBudgetUsage(int userId, int categoryId, DateTime expenseDate, int? excludeExpenseId = null)
         {
             var sql = @"SELECT b.BudgetAmount, ISNULL(SUM(e.Amount),0) AS ExpenseAmount FROM BudgetLimit b LEFT JOIN Expense e ON e.UserId = b.UserId
-                        AND e.CategoryId = b.CategoryId AND e.IsDeleted = 0 AND YEAR(e.ExpenseDate) = YEAR(@ExpenseDate) AND MONTH(e.ExpenseDate) = MONTH(@ExpenseDate)
+                        AND e.CategoryId = b.CategoryId AND e.IsDeleted = 0 AND YEAR(e.ExpenseDate) = YEAR(@ExpenseDate) AND MONTH(e.ExpenseDate) = MONTH(@ExpenseDate)        
+                        AND (@ExcludeExpenseId IS NULL
+                         OR e.ExpenseId <> @ExcludeExpenseId)
                         WHERE b.UserId = @UserId AND b.CategoryId = @CategoryId AND b.BudgetMonth = DATEFROMPARTS(YEAR(@ExpenseDate), MONTH(@ExpenseDate),1) AND b.IsDeleted =0 GROUP BY b.BudgetAmount;";
             using var connection = _context.CreateConnection();
             return await connection.QueryFirstOrDefaultAsync<BudgetUsageDto>(sql,

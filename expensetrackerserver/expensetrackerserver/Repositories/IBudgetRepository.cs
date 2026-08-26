@@ -15,6 +15,6 @@ namespace expensetrackerserver.Repositories
         Task<IEnumerable<BudgetConflictDto>> GetConflictingBudgets(int sourceCategoryId, int targetCategoryId);
         Task MergeConflictingBudgets(int sourceCategoryId, int targetCategoryId);
         Task DeleteConflictingSourceBudgets(int sourceCategoryId, int targetCategoryId);
-        Task<BudgetUsageDto?> GetBudgetUsage(int userId, int categoryId, DateTime expenseDate);
+        Task<BudgetUsageDto?> GetBudgetUsage(int userId, int categoryId, DateTime expenseDate, int? excludeExpenseId = null);
     }
 }
