@@ -1,1 +1,3 @@
 .vs/
+# Backend configuration containing secrets
+expensetrackerserver/expensetrackerserver/appsettings.json
