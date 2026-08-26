@@ -5,7 +5,7 @@ namespace expensetrackerserver.Services
     {
         Task<UserDetailDto> Register(RegisterUserDto dto);
         Task<LoginResponseDto> Login(LoginDto dto);
-      
+
         Task<RefreshTokenResponseDto> Refresh(string refreshToken);
         Task Logout(string refreshToken);
         Task LogoutEverywhere(int userId);
@@ -17,6 +17,10 @@ namespace expensetrackerserver.Services
         Task<MessageResponseDto> ForgotPassword(ForgotPasswordDto dto);
 
         Task<MessageResponseDto> ResetPassword(ResetPasswordDto dto);
+
+        Task DeactivateSelf(int userId);
+        Task ReactivateSelf(ReactiveAccountDto dto);
+        Task DeleteSelf(int userId);
     }
 
 

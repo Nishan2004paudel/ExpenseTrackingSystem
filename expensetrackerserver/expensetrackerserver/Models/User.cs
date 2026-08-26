@@ -15,6 +15,12 @@
 
         public bool IsActive { get; set; }
 
+        public int? DeactivatedBy { get; set; }
+
+        public DateTime? DeactivatedAt { get; set; }
+
+        public string? DeactivationReason { get; set; }
+
         public DateTime CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
