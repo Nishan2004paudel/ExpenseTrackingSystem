@@ -1,119 +1,267 @@
-# Expense Tracker
+# Hisab Kitab
 
-Expense Tracker is a full-stack personal finance application with a .NET backend API and an Angular frontend client. The system supports authentication, expense and budget management, category tracking, profile management, notifications, and admin controls.
+Hisab Kitab is a full-stack personal expense tracking application designed to help users manage their expenses, categories, budgets, and personal financial activities.
+
+The system consists of an ASP.NET Core Web API backend and an Angular frontend. The backend is responsible for authentication, business logic, database operations, budget tracking, expense management, administration, and real-time notifications.
 
 ## Project Overview
 
-This repository includes:
+Hisab Kitab provides users with a centralized platform to:
 
-- Backend API: ASP.NET Core application for business logic, database access, authentication, and real-time notifications.
-- Frontend app: Angular 22 application in the expensetrackerserverfrontend folder for user interaction and dashboard experience.
+- Manage personal expenses
+- Organize expenses using categories
+- Set monthly budgets
+- Monitor budget usage
+- View expense and budget summaries
+- Manage user profiles and settings
+- Receive budget-related notifications
+- Authenticate securely using JWT-based authentication
+- Access administrative features based on user roles
+
+The backend follows a layered approach where controllers handle HTTP requests, services contain business logic, and repositories handle database operations.
 
 ## Backend
 
-The backend provides a secure API for:
+The backend of Hisab Kitab is built using ASP.NET Core Web API.
 
-- User registration, login, logout, email verification, password reset, and JWT refresh
-- Expense and category management
-- Budget tracking and budget usage monitoring
-- User profile and settings management
-- Admin operations
-- Real-time notifications using SignalR
+It provides RESTful APIs for authentication, users, categories, expenses, budgets, dashboards, profiles, settings, administration, and notifications.
 
-### Key backend capabilities
+### Backend Technology Stack
 
-- JWT-based authentication and refresh flow
-- Role-based access control
-- ASP.NET Core controllers and services
-- Entity Framework-based persistence
-- SignalR hub for user-specific live notifications
-- Notification creation on budget threshold events
+- C#
+- ASP.NET Core Web API
+- .NET 8
+- SQL Server
+- Dapper
+- JWT Authentication
+- SignalR
+- Swagger / OpenAPI
+- SMTP / Email Services
+- Google Authentication
+- BCrypt Password Hashing
+- Git for version control
 
-## Frontend
+## Backend Architecture
 
-The frontend is an Angular application located in the expensetrackerserverfrontend folder.
+The backend is organized into several layers to keep responsibilities separated and make the application easier to maintain.
 
-### Frontend features
+### Controllers
 
-- Login, registration, forgot password, reset password, email verification flows
-- Protected and guest-only routes using Angular guards
-- Dashboard, profile, settings, categories, budgets, and expenses pages
-- Admin panel for elevated access
-- Auth state management with Angular signals
-- HTTP interceptor for attaching the access token to API requests
-- Real-time notification connection using SignalR
+Controllers expose HTTP endpoints to the frontend and handle incoming API requests.
 
-### Frontend architecture
+They are responsible for:
 
-- Angular 22 + TypeScript
-- Routing with lazy-loaded feature modules/components
-- Services for auth, profile, budget, category, expense, dashboard, settings, admin, and notifications
-- SignalR integration to connect to /notificationHub and listen for ReceiveNotification events
-- Token handling with refresh flow and in-memory access token storage
+- Receiving requests
+- Validating request models
+- Obtaining the authenticated user's identity
+- Calling the appropriate service
+- Returning API responses
 
-### Frontend startup
+### Services
 
-From the frontend folder:
+Services contain the main business logic of the application.
 
-```bash
-npm install
-npm start
-```
+Examples include:
 
-The app runs with Angular CLI and is intended to connect to the backend API environment configured in the environment settings.
+- `AuthService`
+- `CategoryService`
+- `ExpenseService`
+- `BudgetService`
+- `DashboardService`
+- `ProfileService`
+- `SettingService`
+- `AdminService`
+- `NotificationService`
 
-## Notification Flow
+Services validate business rules before performing database operations.
 
-The app includes a notification pipeline that works across backend and frontend:
+### Repositories
 
-1. A user creates or updates an expense.
-2. The backend calculates budget usage and checks thresholds.
-3. When the budget crosses a configured threshold, a notification is created.
-4. The notification is saved to the database.
-5. SignalR pushes the message to the user-specific group.
-6. The Angular frontend receives the notification and can display it in the UI.
+Repositories are responsible for communicating with the database.
 
-## Project Structure
+Examples include:
+
+- `UserRepository`
+- `CategoryRepository`
+- `ExpenseRepository`
+- `BudgetRepository`
+- `DashboardRepository`
+- `RefreshTokenRepository`
+- `AdminRepository`
+- `NotificationRepository`
+
+Dapper is used to execute SQL queries and map database results to C# models.
+
+### DTOs
+
+Data Transfer Objects are used to control the data exchanged between the API and frontend.
+
+Examples include:
+
+- Login DTOs
+- Registration DTOs
+- Expense DTOs
+- Budget DTOs
+- Category DTOs
+- Dashboard DTOs
+- Notification DTOs
+
+DTOs prevent internal database models from being directly exposed through API endpoints.
+
+## Authentication and Authorization
+
+Hisab Kitab uses JWT-based authentication to secure API endpoints.
+
+### JWT Authentication
+
+After successful authentication, the backend generates an access token containing information about the authenticated user.
+
+Protected endpoints use the `[Authorize]` attribute to ensure that only authenticated users can access them.
+
+The JWT contains claims such as:
+
+- User ID
+- Token version
+- User-related authentication information
+
+The API validates:
+
+- Token signature
+- Issuer
+- Audience
+- Token lifetime
+- Token version
+
+### Token Version Validation
+
+The application uses a token version mechanism to invalidate previously issued tokens.
+
+When a JWT is validated, the backend compares the token's `tokenVersion` claim with the current token version stored for the user.
+
+If the versions do not match, the token is rejected.
+
+This allows previously issued access tokens to become invalid when necessary.
+
+### Refresh Tokens
+
+The backend also supports refresh tokens to allow users to obtain a new access token without logging in again.
+
+Refresh tokens are stored and managed through the refresh token repository.
+
+### Google Authentication
+
+Google authentication is also supported as an authentication method.
+
+The backend handles Google authentication settings and integrates the authentication flow with the application's user system.
+
+## User Management
+
+The backend provides functionality for managing users and their account information.
+
+User-related functionality includes:
+
+- Registration
+- Login
+- Logout
+- Email verification
+- Password reset
+- Refresh token handling
+- Profile management
+- Account settings
+
+Password authentication uses password hashing rather than storing plain-text passwords.
+
+## Category Management
+
+Categories allow users to organize their expenses.
+
+Users can:
+
+- Create categories
+- View categories
+- Update categories
+- Delete categories
+
+Categories belong to individual users.
+
+The backend checks category ownership before allowing a user to create or modify expenses using a category.
+
+## Expense Management
+
+Expense management is one of the core features of Hisab Kitab.
+
+Users can:
+
+- Create expenses
+- View individual expenses
+- Update expenses
+- Soft-delete expenses
+- Filter expenses
+
+An expense contains information such as:
+
+- Expense ID
+- User ID
+- Category ID
+- Amount
+- Expense date
+- Description
+
+### Expense Validation
+
+The backend validates expenses before saving them.
+
+For example:
+
+- The selected category must exist.
+- The category must belong to the authenticated user.
+- Expense dates cannot be in the future.
+- Users cannot modify another user's expenses.
+- Users cannot delete another user's expenses.
+
+### Expense Filtering
+
+Expenses can be filtered using parameters such as:
+
+- Year
+- Month
+- Category
+
+This allows the frontend to retrieve only the expenses relevant to a particular view.
+
+## Budget Management
+
+Users can create monthly budgets for their expenses.
+
+Budgets can be associated with a specific category or used as a broader budget depending on the application's budget configuration.
+
+### Budget Validation
+
+The backend validates:
+
+- Category existence
+- Category ownership
+- Budget amount
+- Budget month
+- Duplicate budgets
+- User ownership
+
+Budgets cannot be created or updated for past months.
+
+### Budget Usage
+
+The backend calculates budget usage by comparing:
+
+- Budget amount
+- Total expenses
+- Remaining amount
+- Percentage of budget used
+
+For example:
 
 ```text
-ExpenseTracker/
-├── README.md
-├── backend-project-files/
-│   └── ASP.NET Core API
-└── expensetrackerserverfrontend/
-    ├── src/
-    ├── public/
-    ├── angular.json
-    ├── package.json
-    └── ...
-```
+Budget Amount = 10,000
+Expenses      = 7,500
 
-## Current Status
-
-The application is progressing with both the API and frontend integrated:
-
-- Authentication and user flows are implemented on the backend and frontend
-- Expense, budget, category, and settings features are present in the frontend app
-- Notification infrastructure is implemented end-to-end with SignalR
-- Notification UI still remains a future enhancement
-
-## Run Instructions
-
-### Backend
-
-Run the ASP.NET server from the backend project and ensure the database connection and environment settings are configured correctly.
-
-### Frontend
-
-Open the frontend project and run:
-
-```bash
-cd expensetrackerserverfrontend
-npm install
-npm start
-```
-
-## Summary
-
-This project combines a secure .NET backend with a modern Angular frontend to deliver a complete expense tracking experience with live notifications, user authentication, budget monitoring, and administrative controls.
-
+Remaining     = 2,500
+Percentage    = 75%
