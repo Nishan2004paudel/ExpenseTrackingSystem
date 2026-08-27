@@ -3,3 +3,6 @@ bin/
 obj/
 # Backend configuration containing secrets
 expensetrackerserver/expensetrackerserver/appsettings.json
+
+# Frontend secrets
+expensetrackerserverfrontend/secrets.txt
