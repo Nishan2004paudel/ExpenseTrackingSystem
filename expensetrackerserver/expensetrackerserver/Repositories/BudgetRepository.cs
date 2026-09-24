@@ -211,7 +211,8 @@ namespace expensetrackerserver.Repositories
                 {
                     UserId = userId,
                     CategoryId = categoryId,
-                    ExpenseDate = expenseDate
+                    ExpenseDate = expenseDate,
+                    ExcludeExpenseId = excludeExpenseId
                 });
         }
     }

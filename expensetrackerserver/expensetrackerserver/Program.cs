@@ -203,7 +203,7 @@ app.UseCors("AngularPolicy");
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapGet("/ping", () => { return "listening to rushab "; });
 app.MapControllers();
 
 app.MapHub<NotificationHub>("/notificationHub");

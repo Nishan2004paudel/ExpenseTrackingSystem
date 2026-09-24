@@ -14,6 +14,7 @@ namespace expensetrackerserver.Data
                 ?? throw new InvalidOperationException("DefaultConnection is missing.");
         }
 
+
         public IDbConnection CreateConnection() => new SqlConnection(_connectionString);
     }
 }
