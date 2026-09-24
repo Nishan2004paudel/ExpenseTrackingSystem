@@ -1,5 +1,5 @@
 export const environment = {
-    production: false,
-    apiUrl: 'https://localhost:7295/api',
-    hubUrl: 'https://localhost:7295/notificationHub'
+    production: true,
+    apiUrl: 'https://nishanpau-001-site1.gtempurl.com/api',
+    hubUrl: 'https://nishanpau-001-site1.gtempurl.com//notificationHub'
 };
